@@ -1,0 +1,38 @@
+# StoryForge .gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+venv/
+.venv/
+
+# Node (if any tooling added later)
+node_modules/
+
+# StoryForge local delivery tracking
+.kanban/
+
+# Claude Code local artifacts
+.claude/settings.local.json
+.claude/agent-memory-local/
+.claude/worktrees/
+
+# Environment and secrets
+.env
+.env.local
+*.pem
+*.key

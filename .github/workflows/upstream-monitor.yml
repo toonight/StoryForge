@@ -1,0 +1,98 @@
+name: Upstream Documentation Monitor
+
+on:
+  schedule:
+    # Run daily at 07:00 UTC (09:00 Paris time)
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    # Allow manual trigger from GitHub UI
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+    name: Check Anthropic docs for changes
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Run upstream monitor
+        id: monitor
+        run: |
+          python scripts/upstream_monitor.py --json --report-path docs/upstream/reports > monitor_output.json 2>/dev/null || true
+
+          # Parse results
+          HAS_CHANGES=$(python -c "import json; d=json.load(open('monitor_output.json')); print('true' if d.get('has_changes') else 'false')")
+          CHANGES_COUNT=$(python -c "import json; d=json.load(open('monitor_output.json')); print(d.get('summary',{}).get('changes',0))")
+          NEW_COUNT=$(python -c "import json; d=json.load(open('monitor_output.json')); print(d.get('summary',{}).get('new_pages',0))")
+          UNREACHABLE_COUNT=$(python -c "import json; d=json.load(open('monitor_output.json')); print(d.get('summary',{}).get('unreachable',0))")
+
+          echo "has_changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
+          echo "changes_count=$CHANGES_COUNT" >> $GITHUB_OUTPUT
+          echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT
+          echo "unreachable_count=$UNREACHABLE_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Generate issue body
+        if: steps.monitor.outputs.has_changes == 'true'
+        run: |
+          python -c "
+          import json, sys
+          sys.path.insert(0, '.')
+          from scripts.upstream_monitor import load_baseline, check_all_pages, generate_issue_body
+
+          # Reuse monitor JSON output instead of re-fetching
+          with open('monitor_output.json') as f:
+              monitor_data = json.load(f)
+
+          # Build a result dict from the JSON output for generate_issue_body
+          result = {
+              'timestamp': monitor_data['timestamp'],
+              'changes': monitor_data.get('changes', []),
+              'new_pages': monitor_data.get('new_pages', []),
+              'unreachable': monitor_data.get('unreachable', []),
+              'unchanged': [],
+              'current_hashes': {},
+          }
+          body = generate_issue_body(result)
+          with open('issue_body.md', 'w') as f:
+              f.write(body)
+          "
+
+      - name: Create GitHub issue
+        if: steps.monitor.outputs.has_changes == 'true'
+        uses: peter-evans/create-issue-from-file@v6
+        with:
+          title: "Upstream docs changed: ${{ steps.monitor.outputs.changes_count }} update(s), ${{ steps.monitor.outputs.new_count }} new page(s)"
+          content-filepath: issue_body.md
+          labels: |
+            upstream
+            automated
+          assignees: ${{ github.repository_owner }}
+
+      - name: Summary (no changes)
+        if: steps.monitor.outputs.has_changes != 'true'
+        run: |
+          echo "### Upstream Monitor - No Changes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All ${{ steps.monitor.outputs.unreachable_count == '0' && '15' || '?' }} documentation pages checked." >> $GITHUB_STEP_SUMMARY
+          echo "No content changes detected. StoryForge is up to date." >> $GITHUB_STEP_SUMMARY
+
+      - name: Summary (changes detected)
+        if: steps.monitor.outputs.has_changes == 'true'
+        run: |
+          echo "### Upstream Monitor - Changes Detected!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Changes**: ${{ steps.monitor.outputs.changes_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New pages**: ${{ steps.monitor.outputs.new_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Unreachable**: ${{ steps.monitor.outputs.unreachable_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "A GitHub issue has been created for triage." >> $GITHUB_STEP_SUMMARY

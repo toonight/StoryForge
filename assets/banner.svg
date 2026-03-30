@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f1a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#d4a574;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e8c9a0;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#d4a574;stop-opacity:0.3" />
+      <stop offset="50%" style="stop-color:#d4a574;stop-opacity:0.08" />
+      <stop offset="100%" style="stop-color:#d4a574;stop-opacity:0" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#d4a574" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="300" fill="url(#bg)" rx="12"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.04" stroke="#d4a574" stroke-width="0.5">
+    <line x1="0" y1="60" x2="1200" y2="60"/>
+    <line x1="0" y1="120" x2="1200" y2="120"/>
+    <line x1="0" y1="180" x2="1200" y2="180"/>
+    <line x1="0" y1="240" x2="1200" y2="240"/>
+    <line x1="200" y1="0" x2="200" y2="300"/>
+    <line x1="400" y1="0" x2="400" y2="300"/>
+    <line x1="600" y1="0" x2="600" y2="300"/>
+    <line x1="800" y1="0" x2="800" y2="300"/>
+    <line x1="1000" y1="0" x2="1000" y2="300"/>
+  </g>
+
+  <!-- Left glow -->
+  <rect x="0" y="0" width="600" height="300" fill="url(#glow)" rx="12"/>
+
+  <!-- Book/Forge icon -->
+  <g transform="translate(80, 90)" filter="url(#shadow)">
+    <!-- Book spine -->
+    <rect x="0" y="0" width="8" height="120" rx="3" fill="url(#accent)"/>
+    <!-- Book pages -->
+    <path d="M8 5 L85 0 L85 110 L8 115 Z" fill="#2a2a4a" stroke="#d4a574" stroke-width="1.5" opacity="0.9"/>
+    <path d="M8 10 L80 6 L80 105 L8 110 Z" fill="#1f1f35" stroke="#d4a574" stroke-width="0.5" opacity="0.5"/>
+    <!-- Page lines -->
+    <line x1="20" y1="25" x2="72" y2="22" stroke="#d4a574" stroke-width="1" opacity="0.3"/>
+    <line x1="20" y1="40" x2="72" y2="37" stroke="#d4a574" stroke-width="1" opacity="0.3"/>
+    <line x1="20" y1="55" x2="72" y2="52" stroke="#d4a574" stroke-width="1" opacity="0.3"/>
+    <line x1="20" y1="70" x2="72" y2="67" stroke="#d4a574" stroke-width="1" opacity="0.3"/>
+    <!-- Spark/Forge element -->
+    <g transform="translate(45, 45)" opacity="0.9">
+      <polygon points="0,-18 5,-6 18,-6 8,3 12,16 0,8 -12,16 -8,3 -18,-6 -5,-6" fill="#d4a574" opacity="0.8"/>
+      <polygon points="0,-10 3,-3 10,-3 5,2 7,10 0,5 -7,10 -5,2 -10,-3 -3,-3" fill="#e8c9a0"/>
+    </g>
+  </g>
+
+  <!-- Title -->
+  <text x="210" y="135" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="64" font-weight="700" fill="url(#accent)" letter-spacing="-1">StoryForge</text>
+
+  <!-- Subtitle -->
+  <text x="213" y="172" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="20" fill="#8a8ab0" font-weight="400" letter-spacing="3">STRUCTURED DELIVERY FOR CLAUDE CODE</text>
+
+  <!-- Separator -->
+  <rect x="210" y="190" width="120" height="2" fill="url(#accent)" opacity="0.5" rx="1"/>
+
+  <!-- Tagline -->
+  <text x="210" y="220" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="15" fill="#6a6a8a" letter-spacing="0.5">Agile orchestration framework with Kanban tracking,</text>
+  <text x="210" y="242" font-family="'Segoe UI', system-ui, -apple-system, sans-serif" font-size="15" fill="#6a6a8a" letter-spacing="0.5">smart agents, and cross-platform tooling.</text>
+
+  <!-- Right side badges -->
+  <g transform="translate(780, 85)">
+    <!-- Kanban mini-board -->
+    <rect x="0" y="0" width="350" height="130" rx="8" fill="#1a1a30" stroke="#d4a574" stroke-width="0.5" opacity="0.6"/>
+    <text x="175" y="22" font-family="monospace" font-size="11" fill="#d4a574" text-anchor="middle" letter-spacing="2" opacity="0.7">KANBAN</text>
+
+    <!-- Column headers -->
+    <text x="45" y="48" font-family="monospace" font-size="9" fill="#6a6a8a" text-anchor="middle">BACKLOG</text>
+    <text x="120" y="48" font-family="monospace" font-size="9" fill="#8a8a40" text-anchor="middle">READY</text>
+    <text x="200" y="48" font-family="monospace" font-size="9" fill="#4a7abd" text-anchor="middle">ACTIVE</text>
+    <text x="275" y="48" font-family="monospace" font-size="9" fill="#7a5aaa" text-anchor="middle">REVIEW</text>
+    <text x="330" y="48" font-family="monospace" font-size="9" fill="#4a9a5a" text-anchor="middle">DONE</text>
+
+    <!-- Column separators -->
+    <line x1="78" y1="35" x2="78" y2="120" stroke="#d4a574" stroke-width="0.3" opacity="0.3"/>
+    <line x1="158" y1="35" x2="158" y2="120" stroke="#d4a574" stroke-width="0.3" opacity="0.3"/>
+    <line x1="238" y1="35" x2="238" y2="120" stroke="#d4a574" stroke-width="0.3" opacity="0.3"/>
+    <line x1="305" y1="35" x2="305" y2="120" stroke="#d4a574" stroke-width="0.3" opacity="0.3"/>
+
+    <!-- Cards -->
+    <rect x="15" y="58" width="50" height="20" rx="3" fill="#2a2a4a" stroke="#6a6a8a" stroke-width="0.5"/>
+    <rect x="15" y="82" width="50" height="20" rx="3" fill="#2a2a4a" stroke="#6a6a8a" stroke-width="0.5"/>
+    <rect x="92" y="58" width="50" height="20" rx="3" fill="#2a2a3a" stroke="#8a8a40" stroke-width="0.5"/>
+    <rect x="172" y="58" width="50" height="20" rx="3" fill="#1a2a3a" stroke="#4a7abd" stroke-width="1"/>
+    <rect x="250" y="58" width="45" height="20" rx="3" fill="#2a1a3a" stroke="#7a5aaa" stroke-width="0.5"/>
+    <rect x="312" y="58" width="25" height="20" rx="3" fill="#1a2a1a" stroke="#4a9a5a" stroke-width="0.5"/>
+    <rect x="312" y="82" width="25" height="20" rx="3" fill="#1a2a1a" stroke="#4a9a5a" stroke-width="0.5"/>
+    <rect x="312" y="106" width="25" height="20" rx="3" fill="#1a2a1a" stroke="#4a9a5a" stroke-width="0.5"/>
+
+    <!-- Active card highlight -->
+    <rect x="172" y="58" width="50" height="20" rx="3" fill="none" stroke="#4a7abd" stroke-width="1.5">
+      <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+
+  <!-- Bottom accent line -->
+  <rect x="0" y="296" width="1200" height="4" fill="url(#accent)" opacity="0.6"/>
+</svg>

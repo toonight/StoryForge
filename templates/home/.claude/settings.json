@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Edit(//.env)",
+      "Edit(//.env.*)",
+      "Write(//.env)",
+      "Write(//.env.*)",
+      "Read(~/.ssh/**)",
+      "Edit(~/.ssh/**)",
+      "Write(~/.ssh/**)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .kanban/board.md ]; then STORIES=$(ls .kanban/stories/STORY-*.md 2>/dev/null | wc -l || echo 0); IN_PROGRESS=$(grep -l 'Status.*In Progress' .kanban/stories/STORY-*.md 2>/dev/null | wc -l || echo 0); echo \"StoryForge: Project detected. $STORIES stories total, $IN_PROGRESS in progress. Check .kanban/board.md before starting.\"; fi",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .kanban/board.md ]; then echo 'StoryForge: Session resumed. Verify .kanban/board.md for current work status before continuing.'; fi",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); FILE=$(echo \"$INPUT\" | grep -o '\"file_path\":\\s*\"[^\"]*\"' | head -1 | sed 's/.*\"\\([^\"]*\\)\"/\\1/'); case \"$FILE\" in *.kanban/stories/*) echo 'StoryForge: Story file modified. Remember to update .kanban/board.md if the status changed.' ;; esac; exit 0",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat); STOP_ACTIVE=$(echo \"$INPUT\" | grep -o '\"stop_hook_active\":\\s*true' || true); if [ -n \"$STOP_ACTIVE\" ]; then exit 0; fi; if [ -f .kanban/board.md ]; then echo 'StoryForge reminder: If you made changes, consider updating .kanban/ artifacts (story status, board, changelog).'; IN_PROGRESS=$(grep -l 'Status.*In Progress' .kanban/stories/STORY-*.md 2>/dev/null | wc -l || echo 0); if [ \"$IN_PROGRESS\" = '0' ] && [ -f .kanban/sprint.md ]; then echo 'StoryForge: No stories in progress. If the sprint is complete, run /security-audit before closing.'; fi; fi; exit 0",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'StoryForge: Permission prompt - Claude needs your input.'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
