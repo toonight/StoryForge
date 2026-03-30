@@ -263,3 +263,41 @@ class TestSettingsHooks:
         with open(HOME_TEMPLATE / "settings.json") as f:
             data = json.load(f)
         assert "Notification" in data.get("hooks", {})
+
+    def test_has_pretooluse_hook(self):
+        """PreToolUse hooks must exist to block dangerous commands."""
+        with open(HOME_TEMPLATE / "settings.json") as f:
+            data = json.load(f)
+        assert "PreToolUse" in data.get("hooks", {})
+
+    def test_pretooluse_matches_bash(self):
+        """PreToolUse hook must target Bash commands."""
+        with open(HOME_TEMPLATE / "settings.json") as f:
+            data = json.load(f)
+        pretooluse = data["hooks"]["PreToolUse"]
+        matchers = [entry.get("matcher", "") for entry in pretooluse]
+        assert "Bash" in matchers
+
+    def test_pretooluse_blocks_force_push(self):
+        """PreToolUse must block git push --force."""
+        with open(HOME_TEMPLATE / "settings.json") as f:
+            data = json.load(f)
+        pretooluse = data["hooks"]["PreToolUse"]
+        all_ifs = [h.get("if", "") for entry in pretooluse for h in entry.get("hooks", [])]
+        assert any("git push --force" in if_val for if_val in all_ifs)
+
+    def test_pretooluse_blocks_rm_rf(self):
+        """PreToolUse must block rm -rf /."""
+        with open(HOME_TEMPLATE / "settings.json") as f:
+            data = json.load(f)
+        pretooluse = data["hooks"]["PreToolUse"]
+        all_ifs = [h.get("if", "") for entry in pretooluse for h in entry.get("hooks", [])]
+        assert any("rm -rf" in if_val for if_val in all_ifs)
+
+    def test_pretooluse_uses_exit_2(self):
+        """PreToolUse blocking hooks must use exit 2 (Anthropic convention)."""
+        with open(HOME_TEMPLATE / "settings.json") as f:
+            data = json.load(f)
+        pretooluse = data["hooks"]["PreToolUse"]
+        all_cmds = [h.get("command", "") for entry in pretooluse for h in entry.get("hooks", [])]
+        assert all("exit 2" in cmd for cmd in all_cmds)

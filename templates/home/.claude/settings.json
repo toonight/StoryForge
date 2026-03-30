@@ -33,6 +33,55 @@
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(rm -rf /*)",
+            "command": "echo 'BLOCKED: rm -rf / is not allowed by StoryForge safety hooks' >&2; exit 2",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(*git push --force*)",
+            "command": "echo 'BLOCKED: force push requires explicit approval — remove this hook to proceed' >&2; exit 2",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(*git push -f *)",
+            "command": "echo 'BLOCKED: force push requires explicit approval — remove this hook to proceed' >&2; exit 2",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(*git reset --hard*)",
+            "command": "echo 'BLOCKED: hard reset requires explicit approval — remove this hook to proceed' >&2; exit 2",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(*chmod 777*)",
+            "command": "echo 'BLOCKED: chmod 777 is not allowed by StoryForge safety hooks' >&2; exit 2",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(*| bash*)",
+            "command": "echo 'BLOCKED: piping to bash is not allowed by StoryForge safety hooks' >&2; exit 2",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "if": "Bash(*|bash*)",
+            "command": "echo 'BLOCKED: piping to bash is not allowed by StoryForge safety hooks' >&2; exit 2",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "startup",
