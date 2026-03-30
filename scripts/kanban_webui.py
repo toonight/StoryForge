@@ -817,6 +817,29 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
+// --- Live Reload ---
+let _liveData = DATA;
+
+async function pollForUpdates() {
+  try {
+    const resp = await fetch('/api/board');
+    if (!resp.ok) return;
+    const newData = await resp.json();
+    const newJson = JSON.stringify(newData);
+    const oldJson = JSON.stringify(_liveData);
+    if (newJson !== oldJson) {
+      _liveData = newData;
+      // Update global DATA reference used by renderers
+      Object.keys(newData).forEach(k => { DATA[k] = newData[k]; });
+      renderCards();
+      renderFeatures();
+      renderBacklog();
+    }
+  } catch (e) { /* ignore network errors */ }
+}
+
+setInterval(pollForUpdates, 3000);
+
 // --- Init ---
 renderCards();
 renderFeatures();
@@ -829,25 +852,34 @@ renderBacklog();
 # --- Server ---
 
 class KanbanHandler(http.server.BaseHTTPRequestHandler):
-    """HTTP handler that serves the Kanban board."""
+    """HTTP handler that serves the Kanban board with live reload."""
 
-    board_data = {}
+    kanban_dir: Optional[Path] = None
+
+    def _get_board_data(self) -> dict:
+        """Re-parse .kanban/ on every request for live updates."""
+        if self.kanban_dir and self.kanban_dir.is_dir():
+            return parse_board(self.kanban_dir)
+        return {}
 
     def do_GET(self):
         if self.path == "/" or self.path == "/index.html":
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
+            board_data = self._get_board_data()
             html = HTML_TEMPLATE.replace(
-                "__BOARD_DATA__", json.dumps(self.board_data)
+                "__BOARD_DATA__", json.dumps(board_data)
             )
             self.wfile.write(html.encode("utf-8"))
         elif self.path == "/api/board":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
+            self.send_header("Cache-Control", "no-cache")
             self.end_headers()
+            board_data = self._get_board_data()
             self.wfile.write(
-                json.dumps(self.board_data, indent=2).encode("utf-8")
+                json.dumps(board_data, indent=2).encode("utf-8")
             )
         else:
             self.send_response(404)
@@ -899,7 +931,7 @@ def main():
     )
     print(f"  {stories_count} stories, {features_count} features, {done_count} done")
 
-    KanbanHandler.board_data = board_data
+    KanbanHandler.kanban_dir = kanban_dir
 
     server = http.server.HTTPServer(("127.0.0.1", port), KanbanHandler)
     url = f"http://127.0.0.1:{port}"
