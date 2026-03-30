@@ -261,7 +261,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   }
 
   .board {
-    display: flex;
+    display: none;
     gap: 16px;
     padding: 20px 24px;
     overflow-x: auto;
