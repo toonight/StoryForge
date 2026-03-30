@@ -3,10 +3,11 @@
 ## Overview
 
 StoryForge is a structured execution framework for Claude Code that enforces agile
-delivery discipline across software projects. It operates as two layers:
+delivery discipline across software projects. It operates as three layers:
 
-1. **Global user layer** (`~/.claude/`) - Operating system for all Claude Code sessions
-2. **Project layer** (`.claude/` + `.kanban/`) - Per-project delivery structure
+1. **Global security layer** (`~/.claude/`) - Thin: identity, agents, security, global skills
+2. **Project delivery layer** (`.claude/`) - Rich: delivery rules, hooks, project skills, rules
+3. **Local overrides** - Developer-specific settings (not committed)
 
 ## Design Principles
 
@@ -17,59 +18,93 @@ delivery discipline across software projects. It operates as two layers:
    hooks and permissions for enforcement
 5. **Minimal agent surface** - One orchestrator, few specialists, no agent sprawl
 6. **Upstream-aware** - Adapt when Claude Code evolves, don't fight the platform
+7. **Thin global, rich project** - Security is global; delivery discipline is per-project
 
 ## System Architecture
 
 ```
 +----------------------------------------------------------+
-|                    User Layer (~/.claude/)                 |
+|              Global Security Layer (~/.claude/)            |
+|                        (THIN)                             |
 |                                                           |
-|  CLAUDE.md          settings.json       agents/           |
-|  (global rules)     (permissions,       portfolio-        |
-|                      hooks, model)      orchestrator.md   |
-|                                         planner.md        |
-|                                         implementer.md    |
-|                                         reviewer.md       |
-|                                         doc-maintainer.md |
-|                                         upstream-watch.md |
-|                                                           |
-|  skills/                                                  |
-|  kanban-bootstrap/  story-write/  sprint-groom/           |
-|  release-adapt/     doc-update/                           |
+|  CLAUDE.md            settings.json        agents/        |
+|  (~27 lines:          (deny rules:         8 universal    |
+|   identity,            .env, .ssh, .aws,   agents         |
+|   anti-drift,          gcloud, azure,                     |
+|   project pointer)     kube, docker,       skills/        |
+|                        npmrc, git-creds;   4 global:      |
+|                        PreToolUse:         kanban-bootstrap|
+|                        blocks rm -rf /,    release-adapt   |
+|                        force push,         security-audit  |
+|                        hard reset,         upstream-check  |
+|                        chmod 777,                         |
+|                        pipe to bash)                      |
 +----------------------------------------------------------+
            |                    |
            v                    v
 +------------------------+  +------------------------+
-|  Project A             |  |  Project B             |
+|  Project A  (RICH)     |  |  Project B  (RICH)     |
 |  .claude/              |  |  .claude/              |
 |    CLAUDE.md           |  |    CLAUDE.md           |
+|    (full delivery      |  |    (full delivery      |
+|     rules, session     |  |     rules, session     |
+|     discipline)        |  |     discipline)        |
 |    settings.json       |  |    settings.json       |
-|  .kanban/              |  |  .kanban/              |
-|    board.md            |  |    board.md            |
-|    backlog.md          |  |    backlog.md          |
-|    sprint.md           |  |    sprint.md           |
-|    stories/            |  |    stories/            |
-+------------------------+  +------------------------+
+|    (all hooks:         |  |    (all hooks +        |
+|     SessionStart,      |  |     deny rules)        |
+|     PostToolUse,       |  |                        |
+|     Stop, Notification |  |    rules/              |
+|     + PreToolUse       |  |    skills/             |
+|     + deny rules)      |  |                        |
+|    rules/              |  |  .kanban/              |
+|      kanban.md         |  |    board.md            |
+|      storyforge-       |  |    backlog.md          |
+|      delivery.md       |  |    sprint.md           |
+|    skills/             |  |    stories/            |
+|      story-write/      |  +------------------------+
+|      dashboard/        |
+|      sprint-groom/     |
+|      doc-update/       |         +------------------+
+|      gh-link/          |         |  Local Overrides |
+|  .kanban/              |         |  (~/.claude/     |
+|    board.md            |         |   local config)  |
+|    backlog.md          |         |  Developer-      |
+|    sprint.md           |         |  specific, not   |
+|    stories/            |         |  committed       |
++------------------------+         +------------------+
 ```
 
 ## Layer Responsibilities
 
-### Global User Layer
+### Layer 1: Global Security (`~/.claude/`)
+
+The global layer is intentionally thin. It provides identity, security enforcement,
+and universal agents. It does NOT contain delivery hooks or delivery rules.
 
 | Component | Type | Purpose |
 |---|---|---|
-| `CLAUDE.md` | Native (contextual) | Global operating rules, agile workflow, anti-drift |
-| `settings.json` | Native (enforcement) | Permissions, hooks, safe defaults |
-| `agents/` | Native (behavioral) | Orchestrator + specialist agents |
-| `skills/` | Native (procedural) | Reusable delivery procedures |
+| `CLAUDE.md` | Native (contextual) | Identity (~27 lines), anti-drift reminder, project pointer |
+| `settings.json` | Native (enforcement) | Cloud credential deny rules, PreToolUse guardrails |
+| `agents/` | Native (behavioral) | 8 universal agents (orchestrator + specialists) |
+| `skills/` | Native (procedural) | 4 global skills (bootstrap, release, security, upstream) |
 
-### Project Layer
+### Layer 2: Project Delivery (`.claude/`)
+
+The project layer is rich. It carries all delivery rules, hooks, project-specific
+skills, and rules files. This is installed by `bootstrap_project.sh`.
 
 | Component | Type | Purpose |
 |---|---|---|
-| `.claude/CLAUDE.md` | Native (contextual) | Project-specific rules and conventions |
-| `.claude/settings.json` | Native (enforcement) | Project permissions and hooks |
+| `.claude/CLAUDE.md` | Native (contextual) | Full delivery rules: execution sequence, Kanban states, done criteria, session discipline |
+| `.claude/settings.json` | Native (enforcement) | All hooks (SessionStart, PostToolUse, Stop, Notification) + PreToolUse safety + env deny |
+| `.claude/rules/` | Native (contextual) | `kanban.md` (artifact format), `storyforge-delivery.md` (discipline) |
+| `.claude/skills/` | Native (procedural) | 5 project skills: story-write, dashboard, sprint-groom, doc-update, gh-link |
 | `.kanban/` | Convention | Delivery tracking artifacts |
+
+### Layer 3: Local Overrides
+
+Developer-specific settings that are not committed. These can override project
+settings for individual workflows.
 
 ## Agent Strategy
 
@@ -91,7 +126,9 @@ The portfolio-orchestrator is the universal top-level control layer. It:
 | `implementer` | Executes bounded implementation tasks | Read, Glob, Grep, Bash, Write, Edit |
 | `reviewer` | Reviews code and artifacts for quality | Read, Glob, Grep, Bash |
 | `doc-maintainer` | Maintains documentation artifacts | Read, Glob, Grep, Write, Edit |
-| `upstream-watch` | Checks Anthropic docs for changes | Read, Glob, Grep, Bash, WebFetch |
+| `security-auditor` | Post-sprint security review (read-only) | Read, Glob, Grep, Bash |
+| `upstream-watch` | Manual Anthropic doc checks | Read, Glob, Grep, Bash, WebFetch |
+| `upstream-monitor` | Automated daily monitoring | Read, Glob, Grep, Bash |
 
 ### Agent Invocation Flow
 
@@ -109,6 +146,7 @@ The portfolio-orchestrator is the universal top-level control layer. It:
 - CLAUDE.md instructions (global and project)
 - Agent system prompts
 - Skill instructions
+- Rules files
 - Kanban board state
 
 Claude reads these and tries to follow them, but compliance is not guaranteed.
@@ -124,9 +162,10 @@ Claude reads these and tries to follow them, but compliance is not guaranteed.
 
 StoryForge uses a layered approach:
 
-1. **Guidance layer** (CLAUDE.md, agent prompts): Tell Claude what to do
-2. **Automation layer** (hooks): Inject context, validate actions, notify
-3. **Restriction layer** (permissions): Block dangerous or off-process actions
+1. **Security layer** (global settings.json): Deny rules for credentials, PreToolUse guardrails
+2. **Delivery layer** (project settings.json): Session hooks, PostToolUse reminders, Stop checks
+3. **Guidance layer** (CLAUDE.md, agent prompts, rules/): Tell Claude what to do
+4. **Restriction layer** (permissions): Block dangerous or off-process actions
 
 ## Data Flow
 
@@ -135,11 +174,12 @@ StoryForge uses a layered approach:
 ```
 Session Start
   |
-  +-> SessionStart hook fires
-  |     +-> Inject active story context (convention)
+  +-> Global CLAUDE.md loaded (identity, anti-drift)
   |
-  +-> CLAUDE.md loaded (global + project)
-  |     +-> Operating rules active
+  +-> Project .claude/CLAUDE.md loaded (delivery rules)
+  |
+  +-> Project SessionStart hook fires
+  |     +-> Inject active story context (convention)
   |
   +-> User prompt
   |     +-> portfolio-orchestrator evaluates
@@ -147,13 +187,49 @@ Session Start
   |     +-> Routes to appropriate specialist
   |
   +-> Implementation
-  |     +-> PreToolUse hooks validate
-  |     +-> PostToolUse hooks log
+  |     +-> PreToolUse hooks validate (global + project)
+  |     +-> PostToolUse hooks log (project)
   |
   +-> Completion
-        +-> Stop hook checks artifact updates
+        +-> Stop hook checks artifact updates (project)
         +-> Kanban board updated
 ```
+
+## Security Architecture
+
+### Credential Protection (Global)
+
+The global `settings.json` blocks access to sensitive files:
+
+| Category | Paths blocked |
+|---|---|
+| Environment files | `.env`, `.env.*` |
+| SSH keys | `~/.ssh/**` |
+| Cloud credentials | `~/.aws/**`, `~/.config/gcloud/**`, `~/.azure/**` |
+| Container/orchestration | `~/.kube/**`, `~/.docker/**` |
+| Package/VCS credentials | `~/.npmrc`, `~/.git-credentials` |
+
+### Command Guardrails (Global + Project)
+
+PreToolUse hooks on Bash commands block:
+
+| Pattern | Risk |
+|---|---|
+| `rm -rf /` | System destruction |
+| `git push --force` / `git push -f` | History rewrite |
+| `git reset --hard` | Data loss |
+| `chmod 777` | Insecure permissions |
+| `\| bash` / `\|bash` | Arbitrary code execution |
+
+### Security Audit
+
+The `/security-audit` skill and `security_audit.py` script scan `.claude/` and
+`.kanban/` directories in addition to project code, detecting:
+- Secrets and credentials in files
+- Injection patterns
+- Weak crypto usage
+- Dangerous file permissions
+- Unsafe StoryForge configuration
 
 ## File Organization
 
@@ -161,16 +237,18 @@ Session Start
 storyforge/
   docs/                          # Architecture and policy documentation
   templates/
-    home/                        # Files for ~/.claude/
+    home/                        # Global layer (~/.claude/) — thin
       .claude/
-        CLAUDE.md                # Global operating system
-        settings.json            # Global settings
-        agents/                  # Global agents
-        skills/                  # Global skills
-    project/                     # Files for new projects
+        CLAUDE.md                # Identity + anti-drift (~27 lines)
+        settings.json            # Security deny rules + PreToolUse guardrails
+        agents/                  # 8 universal agents
+        skills/                  # 4 global skills
+    project/                     # Project layer — rich
       .claude/
-        CLAUDE.md                # Project template
-        settings.json            # Project settings
+        CLAUDE.md                # Full delivery rules
+        settings.json            # All hooks + deny rules
+        rules/                   # kanban.md, storyforge-delivery.md
+        skills/                  # 5 project skills
       .kanban/                   # Delivery artifacts
   scripts/                       # Install, bootstrap, validation
   tests/                         # Validation tests
@@ -181,9 +259,10 @@ storyforge/
 
 | Decision | Choice | Rationale |
 |---|---|---|
+| Architecture model | Thin global, rich project | Security is universal; delivery discipline varies per project |
 | Agent definition format | Markdown + YAML frontmatter | Native Claude Code format |
 | Skill definition format | SKILL.md + YAML frontmatter | Native Claude Code format |
 | Planning artifacts | Markdown files in .kanban/ | Human-readable, git-friendly, no tooling dependency |
-| Scripts | Bash | Cross-platform (works in Git Bash on Windows, native on Mac/Linux) |
+| Scripts | Bash + PowerShell | Cross-platform (Bash for Mac/Linux/Git Bash, PowerShell for Windows) |
 | Tests | Python (pytest) | Widely available, good for file/structure validation |
 | Hook scripts | Bash | Native hook execution, simple stdin/stdout |

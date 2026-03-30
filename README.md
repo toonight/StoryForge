@@ -33,27 +33,26 @@ No external tools. No databases. Just markdown files, Claude Code primitives, an
 
 ## How It Works
 
-StoryForge operates at two levels:
+StoryForge v2 uses a **thin global, rich project** architecture. The global layer provides security and agents; each project carries its own delivery rules, hooks, and skills.
 
 ```
-~/.claude/                          Per-project
-  CLAUDE.md      (global rules)      .claude/CLAUDE.md   (project rules)
-  settings.json  (hooks, perms)      .claude/settings.json
-  agents/        (6 agents)          .kanban/
-  skills/        (6 skills)            board.md
-  rules/         (delivery rules)      backlog.md
-                                       sprint.md
-                                       stories/STORY-001.md
-                                       decisions.md
-                                       changelog.md
+~/.claude/  (thin — security + agents)     Per-project  (rich — delivery)
+  CLAUDE.md      (~27 lines, identity)       .claude/CLAUDE.md   (full delivery rules)
+  settings.json  (deny rules, guardrails)    .claude/settings.json (hooks + deny rules)
+  agents/        (8 agents)                  .claude/rules/      (kanban, discipline)
+  skills/        (4 global skills)           .claude/skills/     (5 project skills)
+                                             .kanban/
+                                               board.md, backlog.md, sprint.md
+                                               stories/, decisions.md, changelog.md
 ```
 
 | Layer | What it provides |
 |:------|:-----------------|
-| **Global** (`~/.claude/`) | Operating rules, agents, skills, hooks — active in every session |
-| **Project** (`.claude/` + `.kanban/`) | Project-specific config and delivery tracking artifacts |
+| **Global** (`~/.claude/`) | Identity, anti-drift, security deny rules, PreToolUse guardrails, universal agents, global skills |
+| **Project** (`.claude/`) | Full delivery rules, all hooks (SessionStart, PostToolUse, Stop, Notification), project skills, rules |
+| **Kanban** (`.kanban/`) | Delivery tracking artifacts (board, stories, backlog, sprint, decisions, changelog) |
 
-### Agents
+### Agents (8 — global)
 
 | Agent | Role |
 |:------|:-----|
@@ -64,30 +63,47 @@ StoryForge operates at two levels:
 | `doc-maintainer` | Updates board, changelog, decisions, and backlog |
 | `security-auditor` | Post-sprint security review — scans for secrets, injections, misconfigs |
 | `upstream-watch` | Monitors Anthropic docs for changes that affect StoryForge |
+| `upstream-monitor` | Automated daily monitoring (sonnet model) |
 
 ### Skills
+
+#### Global skills (4 — installed in `~/.claude/skills/`)
 
 | Skill | Usage |
 |:------|:------|
 | `/kanban-bootstrap` | Initialize `.kanban/` structure in any project |
+| `/release-adapt` | Process an upstream Claude Code change |
+| `/security-audit` | Run security scan (required before sprint closure) |
+| `/upstream-check` | Check Anthropic docs for upstream changes |
+
+#### Project skills (5 — installed in `.claude/skills/` by bootstrap)
+
+| Skill | Usage |
+|:------|:------|
 | `/story-write` | Create a new story with structured fields |
 | `/sprint-groom` | Plan or review a sprint |
 | `/dashboard` | Display the Kanban dashboard |
-| `/release-adapt` | Process an upstream Claude Code change |
 | `/doc-update` | Update delivery artifacts after work completes |
-| `/security-audit` | Run security scan (required before sprint closure) |
-| `/upstream-check` | Check Anthropic docs for upstream changes |
 | `/gh-link` | Link a story to a GitHub issue or PR |
 
-### Hooks
+### Hooks (project-level)
+
+All hooks are defined in the project's `.claude/settings.json`, not at the global level.
 
 | Event | Behavior |
 |:------|:---------|
 | `SessionStart` | Reminds Claude to check `.kanban/board.md` before working |
-| `SessionResume` | Re-injects board context on session resume |
+| `SessionStart (resume)` | Re-injects board context on session resume |
 | `Stop` | Reminds to update artifacts if changes were made (loop-safe) |
 | `PostToolUse` | Reminds to update board when story files are edited |
 | `Notification` | Alerts when Claude needs user input |
+
+### Security (global-level)
+
+| Mechanism | What it does |
+|:----------|:-------------|
+| Permission deny rules | Blocks access to `.env`, `.ssh`, `.aws`, `gcloud`, `.azure`, `.kube`, `.docker`, `.npmrc`, `.git-credentials` |
+| PreToolUse guardrails | Blocks `rm -rf /`, force push, hard reset, `chmod 777`, pipe to bash (exit code 2) |
 
 ### Kanban Flow
 
@@ -139,7 +155,7 @@ cd /path/to/your-project
 /path/to/StoryForge/scripts/bootstrap_project.ps1
 ```
 
-This creates `.claude/` (project config) and `.kanban/` (delivery artifacts).
+This creates `.claude/` (project config with delivery rules, hooks, skills, and rules) and `.kanban/` (delivery artifacts).
 
 ### 3. Start working
 
@@ -149,6 +165,24 @@ This creates `.claude/` (project config) and `.kanban/` (delivery artifacts).
 3. Use /story-write to plan your first story
 4. Implement within the story scope
 5. Use /doc-update when done
+```
+
+## Migrating from v1
+
+If you have an existing v1 installation, re-run the installer with `--migrate` to clean up v1 artifacts (delivery hooks and rules that moved to project level):
+
+```bash
+# Bash
+./scripts/install_storyforge.sh --migrate
+
+# PowerShell
+.\scripts\install_storyforge.ps1 -Migrate
+```
+
+Then re-bootstrap each project to install the new project-level skills, hooks, and rules:
+
+```bash
+/path/to/StoryForge/scripts/bootstrap_project.sh
 ```
 
 ## Dashboard
@@ -263,14 +297,17 @@ storyforge/
   assets/                     # Banner and visual assets
   docs/                       # Architecture, policies, upstream tracking
   templates/
-    home/.claude/             # User-level templates (~/.claude/)
+    home/.claude/             # Global layer (~/.claude/) — thin
       agents/                 # 8 agent definitions
-      skills/                 # 9 skill definitions
-      rules/                  # Global delivery rules
-      CLAUDE.md               # Global operating system
-      settings.json           # Hooks, permissions, safe defaults
-    project/                  # Per-project templates
-      .claude/                # Project config template
+      skills/                 # 4 global skills
+      CLAUDE.md               # Identity + anti-drift (~27 lines)
+      settings.json           # Security deny rules + PreToolUse guardrails
+    project/                  # Project layer — rich
+      .claude/                # Delivery rules, hooks, skills, rules
+        skills/               # 5 project skills
+        rules/                # kanban.md, storyforge-delivery.md
+        CLAUDE.md             # Full delivery rules
+        settings.json         # All hooks + deny rules
       .kanban/                # Kanban artifact templates
   scripts/                    # Bash + PowerShell + Python tooling
   tests/                      # 238 pytest tests
