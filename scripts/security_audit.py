@@ -39,7 +39,7 @@ CODE_EXTENSIONS = {
 # File extensions for config scanning
 CONFIG_EXTENSIONS = {
     ".json", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf",
-    ".env", ".properties", ".xml",
+    ".env", ".properties", ".xml", ".md",
 }
 
 # Directories to skip
@@ -47,7 +47,6 @@ SKIP_DIRS = {
     ".git", "node_modules", "__pycache__", ".venv", "venv",
     ".tox", ".mypy_cache", ".pytest_cache", "dist", "build",
     ".next", ".nuxt", "vendor", "target", "bin", "obj",
-    ".claude", ".kanban",
 }
 
 # Files to exclude from code scanning (contain patterns as test data)
@@ -305,6 +304,35 @@ def audit_storyforge_config(project_path: Path) -> list:
                 description="Auto mode allows Claude to take actions with reduced user oversight.",
                 file_path=rel_path,
                 recommendation="Consider using 'default' or 'acceptEdits' for sensitive projects.",
+            ))
+
+        # Check hooks for unsafe commands
+        hooks = settings.get("hooks", {})
+        unsafe_patterns = ["eval ", "| bash", "|bash", "chmod 777"]
+        for event_name, event_hooks in hooks.items():
+            for hook_entry in event_hooks:
+                for hook in hook_entry.get("hooks", []):
+                    cmd = hook.get("command", "")
+                    for pattern in unsafe_patterns:
+                        if pattern in cmd and event_name != "PreToolUse":
+                            findings.append(Finding(
+                                severity="HIGH",
+                                category="config",
+                                title=f"Unsafe command in {event_name} hook",
+                                description=f"Hook contains potentially dangerous pattern: {pattern}",
+                                file_path=rel_path,
+                                recommendation="Review hook commands for security. Move dangerous patterns to PreToolUse blockers.",
+                            ))
+
+        # Check for missing PreToolUse hooks
+        if hooks and "PreToolUse" not in hooks:
+            findings.append(Finding(
+                severity="MEDIUM",
+                category="config",
+                title="No PreToolUse safety hooks configured",
+                description="Settings have hooks but no PreToolUse guards. Dangerous commands can execute without pre-validation.",
+                file_path=rel_path,
+                recommendation="Add PreToolUse hooks to block rm -rf /, force push, and other dangerous commands.",
             ))
 
     return findings

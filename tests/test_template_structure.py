@@ -283,16 +283,16 @@ class TestSettingsHooks:
         with open(HOME_TEMPLATE / "settings.json") as f:
             data = json.load(f)
         pretooluse = data["hooks"]["PreToolUse"]
-        all_ifs = [h.get("if", "") for entry in pretooluse for h in entry.get("hooks", [])]
-        assert any("git push --force" in if_val for if_val in all_ifs)
+        all_cmds = [h.get("command", "") for entry in pretooluse for h in entry.get("hooks", [])]
+        assert any("git push --force" in cmd for cmd in all_cmds)
 
     def test_pretooluse_blocks_rm_rf(self):
         """PreToolUse must block rm -rf /."""
         with open(HOME_TEMPLATE / "settings.json") as f:
             data = json.load(f)
         pretooluse = data["hooks"]["PreToolUse"]
-        all_ifs = [h.get("if", "") for entry in pretooluse for h in entry.get("hooks", [])]
-        assert any("rm -rf" in if_val for if_val in all_ifs)
+        all_cmds = [h.get("command", "") for entry in pretooluse for h in entry.get("hooks", [])]
+        assert any("rm -rf /" in cmd for cmd in all_cmds)
 
     def test_pretooluse_uses_exit_2(self):
         """PreToolUse blocking hooks must use exit 2 (Anthropic convention)."""

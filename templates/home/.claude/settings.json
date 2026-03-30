@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "deny": [
       "Edit(//.env)",
@@ -39,44 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(rm -rf /*)",
-            "command": "echo 'BLOCKED: rm -rf / is not allowed by StoryForge safety hooks' >&2; exit 2",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "if": "Bash(*git push --force*)",
-            "command": "echo 'BLOCKED: force push requires explicit approval — remove this hook to proceed' >&2; exit 2",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "if": "Bash(*git push -f *)",
-            "command": "echo 'BLOCKED: force push requires explicit approval — remove this hook to proceed' >&2; exit 2",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "if": "Bash(*git reset --hard*)",
-            "command": "echo 'BLOCKED: hard reset requires explicit approval — remove this hook to proceed' >&2; exit 2",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "if": "Bash(*chmod 777*)",
-            "command": "echo 'BLOCKED: chmod 777 is not allowed by StoryForge safety hooks' >&2; exit 2",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "if": "Bash(*| bash*)",
-            "command": "echo 'BLOCKED: piping to bash is not allowed by StoryForge safety hooks' >&2; exit 2",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "if": "Bash(*|bash*)",
-            "command": "echo 'BLOCKED: piping to bash is not allowed by StoryForge safety hooks' >&2; exit 2",
+            "command": "INPUT=$(cat); CMD=$(echo \"$INPUT\" | sed -n 's/.*\"command\":\\s*\"\\(.*\\)\"/\\1/p' | head -1); case \"$CMD\" in *'rm -rf /'*) echo 'BLOCKED by StoryForge: rm -rf / is dangerous' >&2; exit 2;; *'git push --force'*|*'git push -f '*) echo 'BLOCKED by StoryForge: force push requires explicit approval' >&2; exit 2;; *'git reset --hard'*) echo 'BLOCKED by StoryForge: hard reset requires explicit approval' >&2; exit 2;; *'chmod 777'*) echo 'BLOCKED by StoryForge: chmod 777 is insecure' >&2; exit 2;; *'| bash'*|*'|bash'*) echo 'BLOCKED by StoryForge: piping to bash is dangerous' >&2; exit 2;; esac; exit 0",
             "timeout": 5
           }
         ]
