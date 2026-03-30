@@ -2,10 +2,15 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
       "Edit(.env)",
       "Edit(.env.*)",
       "Write(.env)",
-      "Write(.env.*)"
+      "Write(.env.*)",
+      "Read(secrets/**)",
+      "Edit(secrets/**)",
+      "Write(secrets/**)"
     ]
   },
   "hooks": {

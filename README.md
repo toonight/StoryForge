@@ -317,7 +317,7 @@ storyforge/
 ## Validation
 
 ```bash
-# Run the full test suite (154 tests)
+# Run the full test suite (265 tests)
 python -m pytest tests/ -v
 
 # Run the template validation script
