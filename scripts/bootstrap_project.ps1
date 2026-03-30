@@ -95,6 +95,31 @@ if (Test-Path $RulesSourceDir) {
     }
 }
 
+# Install project-level skills
+$SkillsSourceDir = Join-Path $TemplateDir ".claude\skills"
+if (Test-Path $SkillsSourceDir) {
+    Write-Host ""
+    Write-Host "Installing project skills..."
+    $SkillsDestDir = Join-Path $ClaudeDir "skills"
+    if (-not (Test-Path $SkillsDestDir)) {
+        New-Item -ItemType Directory -Path $SkillsDestDir -Force | Out-Null
+    }
+    $SkillDirs = Get-ChildItem $SkillsSourceDir -Directory
+    foreach ($SkillDir in $SkillDirs) {
+        $SkillDest = Join-Path $SkillsDestDir $SkillDir.Name
+        if (-not (Test-Path $SkillDest)) {
+            New-Item -ItemType Directory -Path $SkillDest -Force | Out-Null
+            $SkillFiles = Get-ChildItem $SkillDir.FullName -File
+            foreach ($SkillFile in $SkillFiles) {
+                Copy-Item $SkillFile.FullName (Join-Path $SkillDest $SkillFile.Name)
+            }
+            Write-Host "  CREATED: .claude\skills\$($SkillDir.Name)\" -ForegroundColor Green
+        } else {
+            Write-Host "  EXISTS:  .claude\skills\$($SkillDir.Name)\ (skipped)" -ForegroundColor Yellow
+        }
+    }
+}
+
 # Create .kanban/ structure
 if (-not $SkipKanban) {
     Write-Host ""

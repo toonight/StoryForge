@@ -4,20 +4,27 @@
     Install StoryForge user-level configuration to ~/.claude/
 
 .DESCRIPTION
-    Copies StoryForge templates to the user's home Claude config directory.
-    Backs up existing files before overwriting.
+    v2 architecture: installs thin global layer with security deny rules,
+    PreToolUse guardrails, universal agents, and global skills.
+    Delivery hooks and project skills are installed per-project by
+    bootstrap_project.ps1.
 
 .PARAMETER Force
     Replace existing files instead of appending/skipping.
 
+.PARAMETER Migrate
+    Clean up v1 artifacts (project skills, delivery rule from global).
+
 .EXAMPLE
     .\scripts\install_storyforge.ps1
     .\scripts\install_storyforge.ps1 -Force
+    .\scripts\install_storyforge.ps1 -Migrate
 #>
 
 [CmdletBinding()]
 param(
-    [switch]$Force
+    [switch]$Force,
+    [switch]$Migrate
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,7 +35,7 @@ $TemplateDir = Join-Path $StoryForgeRoot "templates\home\.claude"
 $TargetDir = Join-Path $env:USERPROFILE ".claude"
 $BackupDir = Join-Path $TargetDir ("backups\storyforge-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
 
-Write-Host "=== StoryForge Installer ===" -ForegroundColor Cyan
+Write-Host "=== StoryForge Installer (v2) ===" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Source:  $TemplateDir"
 Write-Host "Target:  $TargetDir"
@@ -70,6 +77,24 @@ function Install-FileWithBackup {
 
     Copy-Item $Source $Dest -Force
     Write-Host "  INSTALLED: $RelativePath" -ForegroundColor Green
+}
+
+# v1 -> v2 migration
+if ($Migrate) {
+    Write-Host "Migrating v1 -> v2 (cleaning global)..."
+    foreach ($skill in @("story-write", "dashboard", "sprint-groom", "doc-update", "gh-link")) {
+        $skillPath = Join-Path $TargetDir "skills\$skill"
+        if (Test-Path $skillPath) {
+            Remove-Item -Recurse -Force $skillPath
+            Write-Host "  REMOVING: skills\$skill (now project-level)" -ForegroundColor Yellow
+        }
+    }
+    $deliveryRule = Join-Path $TargetDir "rules\storyforge-delivery.md"
+    if (Test-Path $deliveryRule) {
+        Remove-Item -Force $deliveryRule
+        Write-Host "  REMOVING: rules\storyforge-delivery.md (now project-level)" -ForegroundColor Yellow
+    }
+    Write-Host ""
 }
 
 # Install CLAUDE.md
@@ -141,15 +166,17 @@ if (Test-Path $RulesDir) {
 Write-Host ""
 Write-Host "=== Installation Complete ===" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Installed components:"
-Write-Host "  - CLAUDE.md (global operating system)"
-Write-Host "  - settings.json (or settings.storyforge.json for manual merge)"
-Write-Host "  - agents/ (portfolio-orchestrator + specialists)"
-Write-Host "  - skills/ (kanban-bootstrap, story-write, sprint-groom, release-adapt, doc-update)"
-Write-Host "  - rules/ (storyforge-delivery)"
+Write-Host "Installed (thin global layer):"
+Write-Host "  - CLAUDE.md (identity + anti-drift rules)"
+Write-Host "  - settings.json (security deny rules + PreToolUse guardrails)"
+Write-Host "  - agents/ (8 universal agents)"
+Write-Host "  - skills/ (4 global: kanban-bootstrap, release-adapt, security-audit, upstream-check)"
 Write-Host ""
 Write-Host "Next steps:"
 Write-Host "  1. If settings.storyforge.json was created, merge it into your settings.json"
-Write-Host "  2. Start a new Claude Code session to load the StoryForge operating system"
+Write-Host "  2. Run bootstrap_project.ps1 in each project to install delivery hooks + skills"
 Write-Host "  3. Use /kanban-bootstrap in a project to set up delivery tracking"
+Write-Host ""
+Write-Host "Note: Delivery hooks, project skills, and delivery rules are now project-level."
+Write-Host "  Run with -Migrate to clean up v1 global artifacts."
 Write-Host ""

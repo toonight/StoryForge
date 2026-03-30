@@ -2,8 +2,8 @@
 # bootstrap_project.sh
 # Bootstrap a project with StoryForge project-level structure.
 #
-# Creates .claude/ and .kanban/ directories with templates.
-# Run this from the root of the project you want to bootstrap.
+# v2 architecture: installs delivery hooks, project skills, rules,
+# and Kanban artifacts. Run this from the project root.
 #
 # Usage: ./bootstrap_project.sh [project-name]
 
@@ -79,6 +79,32 @@ if [ -d "$RULES_SRC" ]; then
     done
 fi
 
+# Install project-level skills
+SKILLS_SRC="$TEMPLATE_DIR/.claude/skills"
+if [ -d "$SKILLS_SRC" ]; then
+    echo ""
+    echo "Installing project skills..."
+    SKILLS_DEST="$PROJECT_DIR/.claude/skills"
+    mkdir -p "$SKILLS_DEST"
+    for skill_dir in "$SKILLS_SRC"/*/; do
+        if [ -d "$skill_dir" ]; then
+            skill_name=$(basename "$skill_dir")
+            skill_dest="$SKILLS_DEST/$skill_name"
+            if [ ! -d "$skill_dest" ]; then
+                mkdir -p "$skill_dest"
+                for skill_file in "$skill_dir"*; do
+                    if [ -f "$skill_file" ]; then
+                        cp "$skill_file" "$skill_dest/"
+                    fi
+                done
+                echo "  CREATED: .claude/skills/$skill_name/"
+            else
+                echo "  EXISTS:  .claude/skills/$skill_name/ (skipped)"
+            fi
+        fi
+    done
+fi
+
 # Create .kanban/ structure
 if [ "$SKIP_KANBAN" = false ]; then
     echo ""
@@ -116,8 +142,10 @@ echo ""
 echo "=== Bootstrap Complete ==="
 echo ""
 echo "Created:"
-echo "  .claude/CLAUDE.md         - Project instructions (customize this)"
-echo "  .claude/settings.json     - Project settings"
+echo "  .claude/CLAUDE.md         - Project instructions + delivery rules (customize this)"
+echo "  .claude/settings.json     - Hooks, permissions, and PreToolUse guardrails"
+echo "  .claude/rules/            - Delivery discipline and Kanban format rules"
+echo "  .claude/skills/           - Project skills (story-write, dashboard, sprint-groom, etc.)"
 if [ "$SKIP_KANBAN" = false ]; then
     echo "  .kanban/board.md          - Kanban board"
     echo "  .kanban/backlog.md        - Backlog"
