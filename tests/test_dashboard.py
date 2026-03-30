@@ -196,10 +196,10 @@ class TestDashboardSkill:
     """Test dashboard skill exists and has proper frontmatter."""
 
     def test_skill_exists(self):
-        assert (REPO_ROOT / "templates" / "home" / ".claude" / "skills" / "dashboard" / "SKILL.md").is_file()
+        assert (REPO_ROOT / "templates" / "project" / ".claude" / "skills" / "dashboard" / "SKILL.md").is_file()
 
     def test_skill_has_frontmatter(self):
-        content = (REPO_ROOT / "templates" / "home" / ".claude" / "skills" / "dashboard" / "SKILL.md").read_text()
+        content = (REPO_ROOT / "templates" / "project" / ".claude" / "skills" / "dashboard" / "SKILL.md").read_text()
         assert content.startswith("---")
         assert "name: dashboard" in content
 
@@ -261,10 +261,10 @@ class TestGhLinkSkill:
     """Test gh-link skill."""
 
     def test_skill_exists(self):
-        assert (REPO_ROOT / "templates" / "home" / ".claude" / "skills" / "gh-link" / "SKILL.md").is_file()
+        assert (REPO_ROOT / "templates" / "project" / ".claude" / "skills" / "gh-link" / "SKILL.md").is_file()
 
     def test_skill_has_frontmatter(self):
-        content = (REPO_ROOT / "templates" / "home" / ".claude" / "skills" / "gh-link" / "SKILL.md").read_text()
+        content = (REPO_ROOT / "templates" / "project" / ".claude" / "skills" / "gh-link" / "SKILL.md").read_text()
         assert content.startswith("---")
         assert "name: gh-link" in content
 

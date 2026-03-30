@@ -360,6 +360,6 @@ class TestSprintGroomIntegration:
     """Test sprint-groom mentions security audit."""
 
     def test_sprint_groom_mentions_audit(self):
-        content = (REPO_ROOT / "templates" / "home" / ".claude" / "skills" / "sprint-groom" / "SKILL.md").read_text()
+        content = (REPO_ROOT / "templates" / "project" / ".claude" / "skills" / "sprint-groom" / "SKILL.md").read_text()
         assert "security" in content.lower()
         assert "security_audit" in content

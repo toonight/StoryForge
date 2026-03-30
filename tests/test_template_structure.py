@@ -86,30 +86,54 @@ class TestAgentDefinitions:
         assert "description:" in content
 
 
-class TestSkillDefinitions:
-    """Verify all skill files have required frontmatter."""
+class TestGlobalSkillDefinitions:
+    """Verify global skill files (kanban-bootstrap, release-adapt, security-audit, upstream-check)."""
 
-    REQUIRED_SKILLS = [
+    GLOBAL_SKILLS = [
         "kanban-bootstrap",
-        "story-write",
-        "sprint-groom",
         "release-adapt",
-        "doc-update",
-        "dashboard",
+        "security-audit",
+        "upstream-check",
     ]
 
-    @pytest.mark.parametrize("skill_name", REQUIRED_SKILLS)
+    @pytest.mark.parametrize("skill_name", GLOBAL_SKILLS)
     def test_skill_file_exists(self, skill_name):
         assert (HOME_TEMPLATE / "skills" / skill_name / "SKILL.md").is_file()
 
-    @pytest.mark.parametrize("skill_name", REQUIRED_SKILLS)
+    @pytest.mark.parametrize("skill_name", GLOBAL_SKILLS)
     def test_skill_has_frontmatter(self, skill_name):
         content = (HOME_TEMPLATE / "skills" / skill_name / "SKILL.md").read_text()
         assert content.startswith("---"), f"{skill_name} missing YAML frontmatter"
 
-    @pytest.mark.parametrize("skill_name", REQUIRED_SKILLS)
+    @pytest.mark.parametrize("skill_name", GLOBAL_SKILLS)
     def test_skill_has_name_field(self, skill_name):
         content = (HOME_TEMPLATE / "skills" / skill_name / "SKILL.md").read_text()
+        assert f"name: {skill_name}" in content
+
+
+class TestProjectSkillDefinitions:
+    """Verify project-level skill files (story-write, dashboard, sprint-groom, doc-update, gh-link)."""
+
+    PROJECT_SKILLS = [
+        "story-write",
+        "dashboard",
+        "sprint-groom",
+        "doc-update",
+        "gh-link",
+    ]
+
+    @pytest.mark.parametrize("skill_name", PROJECT_SKILLS)
+    def test_skill_file_exists(self, skill_name):
+        assert (PROJECT_TEMPLATE / ".claude" / "skills" / skill_name / "SKILL.md").is_file()
+
+    @pytest.mark.parametrize("skill_name", PROJECT_SKILLS)
+    def test_skill_has_frontmatter(self, skill_name):
+        content = (PROJECT_TEMPLATE / ".claude" / "skills" / skill_name / "SKILL.md").read_text()
+        assert content.startswith("---"), f"{skill_name} missing YAML frontmatter"
+
+    @pytest.mark.parametrize("skill_name", PROJECT_SKILLS)
+    def test_skill_has_name_field(self, skill_name):
+        content = (PROJECT_TEMPLATE / ".claude" / "skills" / skill_name / "SKILL.md").read_text()
         assert f"name: {skill_name}" in content
 
 
