@@ -11,6 +11,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).parent.parent
 HOME_TEMPLATE = REPO_ROOT / "templates" / "home" / ".claude"
+PROJECT_TEMPLATE = REPO_ROOT / "templates" / "project"
 
 
 class TestCLAUDEMdContent:
@@ -23,27 +24,49 @@ class TestCLAUDEMdContent:
         assert "Story" in content
         assert "Task" in content
 
-    def test_mentions_kanban_states(self):
-        content = (HOME_TEMPLATE / "CLAUDE.md").read_text()
-        assert "Backlog" in content
-        assert "In Progress" in content
-        assert "Done" in content
-
     def test_mentions_convention_notice(self):
-        """CLAUDE.md should clearly state it's a StoryForge convention."""
+        """Global CLAUDE.md should clearly state it's a StoryForge convention."""
         content = (HOME_TEMPLATE / "CLAUDE.md").read_text()
         assert "convention" in content.lower()
-
-    def test_mentions_execution_sequence(self):
-        content = (HOME_TEMPLATE / "CLAUDE.md").read_text()
-        assert "Planning" in content
-        assert "Implementation" in content
-        assert "Validation" in content
 
     def test_mentions_anti_scope_drift(self):
         content = (HOME_TEMPLATE / "CLAUDE.md").read_text()
         assert "scope" in content.lower()
         assert "backlog" in content.lower()
+
+    def test_points_to_project(self):
+        """Global CLAUDE.md should point to project-level config."""
+        content = (HOME_TEMPLATE / "CLAUDE.md").read_text()
+        assert "project" in content.lower()
+
+
+class TestProjectCLAUDEMdContent:
+    """Verify project CLAUDE.md has full delivery rules."""
+
+    def test_mentions_kanban_states(self):
+        content = (PROJECT_TEMPLATE / ".claude" / "CLAUDE.md").read_text()
+        assert "Backlog" in content
+        assert "In Progress" in content
+        assert "Done" in content
+
+    def test_mentions_execution_sequence(self):
+        content = (PROJECT_TEMPLATE / ".claude" / "CLAUDE.md").read_text()
+        assert "Planning" in content
+        assert "Implementation" in content
+        assert "Validation" in content
+
+    def test_mentions_done_criteria(self):
+        content = (PROJECT_TEMPLATE / ".claude" / "CLAUDE.md").read_text()
+        assert "Done Criteria" in content
+        assert "security audit" in content.lower()
+
+    def test_mentions_session_discipline(self):
+        content = (PROJECT_TEMPLATE / ".claude" / "CLAUDE.md").read_text()
+        assert "Session Discipline" in content
+
+    def test_has_project_placeholder(self):
+        content = (PROJECT_TEMPLATE / ".claude" / "CLAUDE.md").read_text()
+        assert "{{PROJECT_NAME}}" in content
 
 
 class TestSettingsContent:

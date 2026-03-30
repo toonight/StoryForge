@@ -226,8 +226,13 @@ class TestRulesFiles:
         assert content.startswith("---")
         assert "paths:" in content
 
-    def test_home_template_has_rules(self):
-        assert (HOME_TEMPLATE / "rules" / "storyforge-delivery.md").is_file()
+    def test_project_template_has_delivery_rule(self):
+        assert (PROJECT_TEMPLATE / ".claude" / "rules" / "storyforge-delivery.md").is_file()
+
+    def test_project_delivery_rule_has_paths(self):
+        content = (PROJECT_TEMPLATE / ".claude" / "rules" / "storyforge-delivery.md").read_text()
+        assert "paths:" in content
+        assert ".kanban/" in content
 
     def test_project_template_has_kanban_rule(self):
         assert (PROJECT_TEMPLATE / ".claude" / "rules" / "kanban.md").is_file()
@@ -238,40 +243,23 @@ class TestRulesFiles:
         assert ".kanban/" in content
 
 
-class TestSettingsHooks:
-    """Verify settings.json hooks are properly configured."""
+class TestGlobalSettingsHooks:
+    """Verify global settings.json has security hooks only (thin global)."""
 
-    def test_has_session_start_hook(self):
-        with open(HOME_TEMPLATE / "settings.json") as f:
-            data = json.load(f)
-        assert "SessionStart" in data.get("hooks", {})
-
-    def test_has_stop_hook(self):
-        with open(HOME_TEMPLATE / "settings.json") as f:
-            data = json.load(f)
-        assert "Stop" in data.get("hooks", {})
-
-    def test_stop_hook_checks_stop_active(self):
-        """Stop hook must check stop_hook_active to prevent infinite loops."""
-        with open(HOME_TEMPLATE / "settings.json") as f:
-            data = json.load(f)
-        stop_hooks = data["hooks"]["Stop"]
-        hook_command = stop_hooks[0]["hooks"][0]["command"]
-        assert "stop_hook_active" in hook_command
-
-    def test_has_notification_hook(self):
-        with open(HOME_TEMPLATE / "settings.json") as f:
-            data = json.load(f)
-        assert "Notification" in data.get("hooks", {})
-
-    def test_has_pretooluse_hook(self):
-        """PreToolUse hooks must exist to block dangerous commands."""
+    def test_global_has_pretooluse_hook(self):
         with open(HOME_TEMPLATE / "settings.json") as f:
             data = json.load(f)
         assert "PreToolUse" in data.get("hooks", {})
 
+    def test_global_has_no_delivery_hooks(self):
+        """Global settings should NOT have delivery hooks (moved to project)."""
+        with open(HOME_TEMPLATE / "settings.json") as f:
+            data = json.load(f)
+        hooks = data.get("hooks", {})
+        for event in ["SessionStart", "PostToolUse", "Stop", "Notification"]:
+            assert event not in hooks, f"Global should not have {event} hook (project-level)"
+
     def test_pretooluse_matches_bash(self):
-        """PreToolUse hook must target Bash commands."""
         with open(HOME_TEMPLATE / "settings.json") as f:
             data = json.load(f)
         pretooluse = data["hooks"]["PreToolUse"]
@@ -279,7 +267,6 @@ class TestSettingsHooks:
         assert "Bash" in matchers
 
     def test_pretooluse_blocks_force_push(self):
-        """PreToolUse must block git push --force."""
         with open(HOME_TEMPLATE / "settings.json") as f:
             data = json.load(f)
         pretooluse = data["hooks"]["PreToolUse"]
@@ -287,7 +274,6 @@ class TestSettingsHooks:
         assert any("git push --force" in cmd for cmd in all_cmds)
 
     def test_pretooluse_blocks_rm_rf(self):
-        """PreToolUse must block rm -rf /."""
         with open(HOME_TEMPLATE / "settings.json") as f:
             data = json.load(f)
         pretooluse = data["hooks"]["PreToolUse"]
@@ -295,9 +281,46 @@ class TestSettingsHooks:
         assert any("rm -rf /" in cmd for cmd in all_cmds)
 
     def test_pretooluse_uses_exit_2(self):
-        """PreToolUse blocking hooks must use exit 2 (Anthropic convention)."""
         with open(HOME_TEMPLATE / "settings.json") as f:
             data = json.load(f)
         pretooluse = data["hooks"]["PreToolUse"]
         all_cmds = [h.get("command", "") for entry in pretooluse for h in entry.get("hooks", [])]
         assert all("exit 2" in cmd for cmd in all_cmds)
+
+
+class TestProjectSettingsHooks:
+    """Verify project settings.json has delivery hooks."""
+
+    def test_project_has_session_start_hook(self):
+        with open(PROJECT_TEMPLATE / ".claude" / "settings.json") as f:
+            data = json.load(f)
+        assert "SessionStart" in data.get("hooks", {})
+
+    def test_project_has_stop_hook(self):
+        with open(PROJECT_TEMPLATE / ".claude" / "settings.json") as f:
+            data = json.load(f)
+        assert "Stop" in data.get("hooks", {})
+
+    def test_project_stop_hook_checks_stop_active(self):
+        """Stop hook must check stop_hook_active to prevent infinite loops."""
+        with open(PROJECT_TEMPLATE / ".claude" / "settings.json") as f:
+            data = json.load(f)
+        stop_hooks = data["hooks"]["Stop"]
+        hook_command = stop_hooks[0]["hooks"][0]["command"]
+        assert "stop_hook_active" in hook_command
+
+    def test_project_has_notification_hook(self):
+        with open(PROJECT_TEMPLATE / ".claude" / "settings.json") as f:
+            data = json.load(f)
+        assert "Notification" in data.get("hooks", {})
+
+    def test_project_has_posttooluse_hook(self):
+        with open(PROJECT_TEMPLATE / ".claude" / "settings.json") as f:
+            data = json.load(f)
+        assert "PostToolUse" in data.get("hooks", {})
+
+    def test_project_has_pretooluse_hook(self):
+        """Project should also have PreToolUse for standalone use."""
+        with open(PROJECT_TEMPLATE / ".claude" / "settings.json") as f:
+            data = json.load(f)
+        assert "PreToolUse" in data.get("hooks", {})

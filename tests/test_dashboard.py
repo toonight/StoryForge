@@ -274,13 +274,13 @@ class TestPostToolUseHook:
 
     def test_settings_has_post_tool_use(self):
         import json
-        with open(REPO_ROOT / "templates" / "home" / ".claude" / "settings.json") as f:
+        with open(REPO_ROOT / "templates" / "project" / ".claude" / "settings.json") as f:
             data = json.load(f)
         assert "PostToolUse" in data.get("hooks", {})
 
     def test_post_tool_use_targets_edit_write(self):
         import json
-        with open(REPO_ROOT / "templates" / "home" / ".claude" / "settings.json") as f:
+        with open(REPO_ROOT / "templates" / "project" / ".claude" / "settings.json") as f:
             data = json.load(f)
         hook = data["hooks"]["PostToolUse"][0]
         assert "Edit" in hook["matcher"]
