@@ -70,6 +70,15 @@ class TestSettingsContent:
         deny = data.get("permissions", {}).get("deny", [])
         assert len(deny) > 0, "Settings should have at least one deny rule"
 
+    def test_has_cloud_credential_deny_rules(self):
+        """Settings should deny access to cloud credential directories."""
+        with open(HOME_TEMPLATE / "settings.json") as f:
+            data = json.load(f)
+        deny = data.get("permissions", {}).get("deny", [])
+        deny_str = " ".join(deny)
+        for path in ["~/.aws/**", "~/.kube/**", "~/.docker/**", "~/.git-credentials"]:
+            assert path in deny_str, f"Missing deny rule for {path}"
+
     def test_has_hooks(self):
         """Settings should define hooks."""
         with open(HOME_TEMPLATE / "settings.json") as f:
