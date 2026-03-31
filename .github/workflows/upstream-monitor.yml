@@ -28,7 +28,7 @@ jobs:
       - name: Run upstream monitor
         id: monitor
         run: |
-          python scripts/upstream_monitor.py --json --report-path docs/upstream/reports > monitor_output.json 2>/dev/null || true
+          python scripts/upstream_monitor.py --json --report-path docs/upstream/reports --issue-body issue_body.md > monitor_output.json 2>monitor_stderr.log || true
 
           # Parse results
           HAS_CHANGES=$(python -c "import json; d=json.load(open('monitor_output.json')); print('true' if d.get('has_changes') else 'false')")
@@ -41,31 +41,10 @@ jobs:
           echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT
           echo "unreachable_count=$UNREACHABLE_COUNT" >> $GITHUB_OUTPUT
 
-      - name: Generate issue body
-        if: steps.monitor.outputs.has_changes == 'true'
-        run: |
-          python -c "
-          import json, sys
-          sys.path.insert(0, '.')
-          from scripts.upstream_monitor import load_baseline, check_all_pages, generate_issue_body
-
-          # Reuse monitor JSON output instead of re-fetching
-          with open('monitor_output.json') as f:
-              monitor_data = json.load(f)
-
-          # Build a result dict from the JSON output for generate_issue_body
-          result = {
-              'timestamp': monitor_data['timestamp'],
-              'changes': monitor_data.get('changes', []),
-              'new_pages': monitor_data.get('new_pages', []),
-              'unreachable': monitor_data.get('unreachable', []),
-              'unchanged': [],
-              'current_hashes': {},
-          }
-          body = generate_issue_body(result)
-          with open('issue_body.md', 'w') as f:
-              f.write(body)
-          "
+          # Surface any errors in the step summary
+          if [ -s monitor_stderr.log ]; then
+            echo "::warning::Upstream monitor stderr output detected — check logs"
+          fi
 
       - name: Create GitHub issue
         if: steps.monitor.outputs.has_changes == 'true'

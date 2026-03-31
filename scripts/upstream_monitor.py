@@ -7,10 +7,11 @@ Compares current page content against stored hash baselines and generates
 change reports when differences are detected.
 
 Usage:
-    python scripts/upstream_monitor.py                    # Check for changes
-    python scripts/upstream_monitor.py --update-baseline  # Save current state as baseline
-    python scripts/upstream_monitor.py --report-path out  # Write report to directory
-    python scripts/upstream_monitor.py --json             # Output JSON for CI pipelines
+    python scripts/upstream_monitor.py                        # Check for changes
+    python scripts/upstream_monitor.py --update-baseline      # Save current state as baseline
+    python scripts/upstream_monitor.py --report-path out      # Write report to directory
+    python scripts/upstream_monitor.py --json                 # Output JSON for CI pipelines
+    python scripts/upstream_monitor.py --issue-body body.md   # Write GitHub issue body to file
 
 Requires: Python 3.8+ (stdlib only, no pip dependencies)
 """
@@ -399,10 +400,13 @@ def main():
     update_baseline = "--update-baseline" in args
     json_output = "--json" in args
     report_path = None
+    issue_body_path = None
 
     for i, arg in enumerate(args):
         if arg == "--report-path" and i + 1 < len(args):
             report_path = Path(args[i + 1])
+        elif arg == "--issue-body" and i + 1 < len(args):
+            issue_body_path = Path(args[i + 1])
 
     # Load baseline
     baseline = load_baseline()
@@ -491,6 +495,13 @@ def main():
         report_file.write_text(generate_markdown_report(result), encoding="utf-8")
         if not json_output:
             print(f"\nReport saved to {report_file}")
+
+    # Write issue body if requested (for CI pipelines)
+    if issue_body_path and (result["changes"] or result["new_pages"]):
+        issue_body_path.parent.mkdir(parents=True, exist_ok=True)
+        issue_body_path.write_text(generate_issue_body(result), encoding="utf-8")
+        if not json_output:
+            print(f"Issue body saved to {issue_body_path}")
 
     # Exit code: 1 if changes detected (for CI pipelines)
     if result["changes"] or result["new_pages"]:
