@@ -137,22 +137,31 @@ def fetch_page(url: str) -> Optional[str]:
 def normalize_content(html: str) -> str:
     """Normalize page content for stable hashing.
 
-    Strips volatile elements (timestamps, session tokens, analytics)
-    while preserving semantic documentation content.
+    Strips volatile elements (scripts, styles, Next.js build artifacts,
+    session tokens, analytics) while preserving semantic documentation content.
     """
     # Normalize line endings first
     text = html.replace("\r\n", "\n").replace("\r", "\n")
-    # Remove script tags and their content
+    # Remove script tags and their content (largest source of dynamic noise)
     text = re.sub(r"<script[^>]*>.*?</script>", "", text, flags=re.DOTALL)
     # Remove style tags
     text = re.sub(r"<style[^>]*>.*?</style>", "", text, flags=re.DOTALL)
     # Remove HTML comments
     text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+    # Remove link/meta tags (contain build-specific chunk URLs)
+    text = re.sub(r"<link[^>]*>", "", text)
+    text = re.sub(r"<meta[^>]*>", "", text)
     # Remove data attributes (often contain dynamic values)
     text = re.sub(r'\s+data-[a-z-]+="[^"]*"', "", text)
     # Remove nonce attributes
     text = re.sub(r'\s+nonce="[^"]*"', "", text)
-    # Strip HTML tags to get text content
+    # Remove Next.js build artifact URLs (chunk hashes change per deployment)
+    text = re.sub(r"/_next/static/[^\s\"'<>]+", "", text)
+    # Remove UUID-like identifiers
+    text = re.sub(
+        r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", "", text
+    )
+    # Strip remaining HTML tags to get text content
     text = re.sub(r"<[^>]+>", " ", text)
     # Collapse whitespace
     text = re.sub(r"\s+", " ", text).strip()
