@@ -637,7 +637,7 @@ def main():
     # Ensure stdout can handle Unicode on Windows
     if sys.platform == "win32":
         try:
-            sys.stdout.reconfigure(encoding="utf-8")
+            sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
         except (AttributeError, TypeError):
             # Python < 3.7 or non-reconfigurable stream
             import io

@@ -14,6 +14,8 @@ STORYFORGE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TEMPLATE_DIR="$STORYFORGE_ROOT/templates/project"
 PROJECT_DIR="$(pwd)"
 PROJECT_NAME="${1:-$(basename "$PROJECT_DIR")}"
+# Escape sed metacharacters in project name to prevent injection
+PROJECT_NAME_SED=$(printf '%s\n' "$PROJECT_NAME" | sed 's/[&/\]/\\&/g')
 
 echo "=== StoryForge Project Bootstrap ==="
 echo ""
@@ -49,7 +51,7 @@ echo "Setting up .claude/ ..."
 mkdir -p "$PROJECT_DIR/.claude"
 
 if [ ! -f "$PROJECT_DIR/.claude/CLAUDE.md" ]; then
-    sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
+    sed "s/{{PROJECT_NAME}}/$PROJECT_NAME_SED/g" \
         "$TEMPLATE_DIR/.claude/CLAUDE.md" > "$PROJECT_DIR/.claude/CLAUDE.md"
     echo "  CREATED: .claude/CLAUDE.md"
 else
@@ -112,7 +114,7 @@ if [ "$SKIP_KANBAN" = false ]; then
     mkdir -p "$PROJECT_DIR/.kanban/stories"
 
     for template_file in board.md backlog.md sprint.md decisions.md changelog.md; do
-        sed "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
+        sed "s/{{PROJECT_NAME}}/$PROJECT_NAME_SED/g" \
             "$TEMPLATE_DIR/.kanban/$template_file" > "$PROJECT_DIR/.kanban/$template_file"
         echo "  CREATED: .kanban/$template_file"
     done

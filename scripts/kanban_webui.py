@@ -635,6 +635,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <script>
 const DATA = __BOARD_DATA__;
 
+// Escape HTML special characters to prevent XSS from markdown content
+function esc(s) {
+  const el = document.createElement('span');
+  el.textContent = s;
+  return el.innerHTML;
+}
+
 // --- Render Board ---
 function statusToColumn(status) {
   const s = status.toLowerCase().replace(/\s+/g, '');
@@ -672,11 +679,11 @@ function renderCards() {
         : 0;
       const feat = story.feature.replace(/^(FEAT-\d+)\s*-?\s*/, '$1 ');
       return `
-        <div class="card" onclick="openModal('${story.id}')">
-          <div class="card-id">${story.id}</div>
-          <div class="card-title">${story.title}</div>
+        <div class="card" onclick="openModal('${esc(story.id)}')">
+          <div class="card-id">${esc(story.id)}</div>
+          <div class="card-title">${esc(story.title)}</div>
           <div class="card-meta">
-            <span class="card-feature">${feat.split(' ')[0]}</span>
+            <span class="card-feature">${esc(feat.split(' ')[0])}</span>
             <span>${story.criteria_done}/${story.criteria_total}</span>
           </div>
           ${story.criteria_total > 0 ? `
@@ -708,8 +715,8 @@ function renderFeatures() {
 
   let html = '';
   Object.values(byInit).forEach(init => {
-    html += `<h2 style="margin-bottom:4px;font-size:15px;">${init.id}: ${init.title}
-      <span style="font-size:12px;color:var(--text-dim);font-weight:400;"> &mdash; ${init.status}</span></h2>`;
+    html += `<h2 style="margin-bottom:4px;font-size:15px;">${esc(init.id)}: ${esc(init.title)}
+      <span style="font-size:12px;color:var(--text-dim);font-weight:400;"> &mdash; ${esc(init.status)}</span></h2>`;
     html += '<div class="feature-grid">';
     init.features.forEach(f => {
       const statusCls = f.status.toLowerCase().replace(/\s+/g, '');
@@ -719,13 +726,13 @@ function renderFeatures() {
       html += `
         <div class="feature-card">
           <h3>
-            <span class="feat-id">${f.id}</span>
-            ${f.title}
-            <span class="feat-status ${statusCls}">${f.status}</span>
+            <span class="feat-id">${esc(f.id)}</span>
+            ${esc(f.title)}
+            <span class="feat-status ${statusCls}">${esc(f.status)}</span>
           </h3>
           <div class="feature-stories">
             ${stories.length > 0
-              ? stories.map(s => `<div>${s.id}: ${s.title}</div>`).join('')
+              ? stories.map(s => `<div>${esc(s.id)}: ${esc(s.title)}</div>`).join('')
               : '<div style="font-style:italic">No tracked stories</div>'}
           </div>
         </div>`;
@@ -744,8 +751,8 @@ function renderBacklog() {
   }
   view.innerHTML = DATA.backlog_items.map(item => `
     <div class="backlog-section">
-      <h3>${item.title}</h3>
-      <ul>${item.details.map(d => `<li>${d}</li>`).join('')}</ul>
+      <h3>${esc(item.title)}</h3>
+      <ul>${item.details.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
     </div>
   `).join('');
 }
@@ -758,24 +765,24 @@ function openModal(storyId) {
   const modal = document.getElementById('modal');
   modal.innerHTML = `
     <button class="close-btn" onclick="closeModal()">&times;</button>
-    <div class="modal-id">${story.id}</div>
-    <h2>${story.title}</h2>
+    <div class="modal-id">${esc(story.id)}</div>
+    <h2>${esc(story.title)}</h2>
     <br>
     <div class="modal-field">
       <div class="modal-label">Status</div>
-      <div class="modal-value">${story.status}</div>
+      <div class="modal-value">${esc(story.status)}</div>
     </div>
     <div class="modal-field">
       <div class="modal-label">Feature</div>
-      <div class="modal-value">${story.feature}</div>
+      <div class="modal-value">${esc(story.feature)}</div>
     </div>
     <div class="modal-field">
       <div class="modal-label">Initiative</div>
-      <div class="modal-value">${story.initiative}</div>
+      <div class="modal-value">${esc(story.initiative)}</div>
     </div>
     <div class="modal-field">
       <div class="modal-label">Created</div>
-      <div class="modal-value">${story.created}</div>
+      <div class="modal-value">${esc(story.created)}</div>
     </div>
     ${story.criteria.length > 0 ? `
     <div class="modal-field">
@@ -784,7 +791,7 @@ function openModal(storyId) {
         ${story.criteria.map(c => `
           <li>
             <span class="${c.done ? 'check' : 'uncheck'}">${c.done ? '&#10003;' : '&#9675;'}</span>
-            ${c.text}
+            ${esc(c.text)}
           </li>
         `).join('')}
       </ul>
@@ -893,7 +900,7 @@ class KanbanHandler(http.server.BaseHTTPRequestHandler):
 def main():
     if sys.platform == "win32":
         try:
-            sys.stdout.reconfigure(encoding="utf-8")
+            sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
         except (AttributeError, TypeError):
             pass
 
