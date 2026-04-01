@@ -1,37 +1,20 @@
 # Changelog
 
-## [2.0.0] - 2026-03-29
+## [1.1.0] - 2026-04-01
 
-Architecture refactoring: moved from "fat global, thin project" to "thin global, rich project".
+### Upstream Monitor Hardened
+- Replaced `peter-evans/create-issue-from-file` with native `gh issue create` in GitHub Actions workflow
+- Improved content normalization: strips Next.js build artifacts, `<link>`/`<meta>` tags, UUIDs to eliminate false positives
+- Added `--issue-body` flag to `upstream_monitor.py`, removing fragile inline Python from the workflow
+- Replaced `2>/dev/null` with proper stderr logging and GitHub Actions warnings
 
-### Architecture Change
-- Global layer (`~/.claude/`) is now thin: identity CLAUDE.md (~27 lines), security deny rules, PreToolUse guardrails, 8 agents, 4 global skills
-- Project layer (`.claude/`) is now rich: full delivery rules in CLAUDE.md, all hooks in settings.json, rules/ directory, 5 project skills
-- Delivery hooks (SessionStart, PostToolUse, Stop, Notification) moved from global to project level
-- Delivery rules moved from global CLAUDE.md to project CLAUDE.md and `.claude/rules/`
+### Security Fixes
+- Fixed stored XSS in Kanban WebUI: all user-sourced values now escaped via `esc()` before `innerHTML`
+- Fixed sed injection in `bootstrap_project.sh`: `PROJECT_NAME` metacharacters are now escaped
+- Added missing `Read` deny rules for `.env` / `.env.*` in repo settings
 
-### Security Hardened
-- Added cloud credential deny rules: `.aws`, `gcloud`, `.azure`, `.kube`, `.docker`, `.npmrc`, `.git-credentials`
-- PreToolUse hooks block dangerous Bash commands with exit code 2: `rm -rf /`, force push, hard reset, `chmod 777`, pipe to bash
-- Security audit now scans `.claude/` and `.kanban/` directories
-
-### Skills Reorganized
-- Global skills (4): `/kanban-bootstrap`, `/release-adapt`, `/security-audit`, `/upstream-check`
-- Project skills (5, installed by bootstrap): `/story-write`, `/dashboard`, `/sprint-groom`, `/doc-update`, `/gh-link`
-
-### Project Template Enriched
-- `.claude/CLAUDE.md` now includes full StoryForge delivery rules (execution sequence, Kanban states, done criteria, session discipline, anti-scope-drift)
-- `.claude/settings.json` now includes all hooks + PreToolUse safety + env deny rules
-- Added `.claude/rules/kanban.md` for artifact format rules
-- Added `.claude/rules/storyforge-delivery.md` for delivery discipline
-
-### Scripts Updated
-- `install_storyforge.sh` / `install_storyforge.ps1`: added `--migrate` flag to clean v1 artifacts
-- `bootstrap_project.sh` / `bootstrap_project.ps1`: now installs skills and rules into project `.claude/`
-
-### Documentation
-- Updated architecture docs to reflect 3-layer model (global security + project delivery + local overrides)
-- Updated README with v1-to-v2 migration guide
+### Quality
+- Added `type: ignore[attr-defined]` for `sys.stdout.reconfigure()` across all Python scripts (Pylance false positive)
 
 ## [1.0.0] - 2026-03-29
 
@@ -85,6 +68,6 @@ Initial release of StoryForge.
 - Upstream adaptation process with release watch and migration templates
 
 ### Testing
-- 238 pytest tests covering templates, agents, skills, scripts, dashboard,
+- 265 pytest tests covering templates, agents, skills, scripts, dashboard,
   upstream monitor, and security audit
 - Template validation script (Bash + PowerShell)

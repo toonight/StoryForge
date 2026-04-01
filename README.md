@@ -12,7 +12,8 @@
   <a href="#dashboard">Dashboard</a> &nbsp;&bull;&nbsp;
   <a href="#web-ui">Web UI</a> &nbsp;&bull;&nbsp;
   <a href="#documentation">Documentation</a> &nbsp;&bull;&nbsp;
-  <a href="#cross-platform">Cross-Platform</a>
+  <a href="#cross-platform">Cross-Platform</a> &nbsp;&bull;&nbsp;
+  <a href="#changelog">Changelog</a>
 </p>
 
 ---
@@ -33,7 +34,7 @@ No external tools. No databases. Just markdown files, Claude Code primitives, an
 
 ## How It Works
 
-StoryForge v2 uses a **thin global, rich project** architecture. The global layer provides security and agents; each project carries its own delivery rules, hooks, and skills.
+StoryForge uses a **thin global, rich project** architecture. The global layer provides security and agents; each project carries its own delivery rules, hooks, and skills.
 
 ```
 ~/.claude/  (thin — security + agents)     Per-project  (rich — delivery)
@@ -167,24 +168,6 @@ This creates `.claude/` (project config with delivery rules, hooks, skills, and 
 5. Use /doc-update when done
 ```
 
-## Migrating from v1
-
-If you have an existing v1 installation, re-run the installer with `--migrate` to clean up v1 artifacts (delivery hooks and rules that moved to project level):
-
-```bash
-# Bash
-./scripts/install_storyforge.sh --migrate
-
-# PowerShell
-.\scripts\install_storyforge.ps1 -Migrate
-```
-
-Then re-bootstrap each project to install the new project-level skills, hooks, and rules:
-
-```bash
-/path/to/StoryForge/scripts/bootstrap_project.sh
-```
-
 ## Dashboard
 
 StoryForge includes a terminal dashboard that renders your Kanban state at a glance.
@@ -310,19 +293,23 @@ storyforge/
         settings.json         # All hooks + deny rules
       .kanban/                # Kanban artifact templates
   scripts/                    # Bash + PowerShell + Python tooling
-  tests/                      # 238 pytest tests
+  tests/                      # 265 pytest tests
   examples/                   # Sample project with populated .kanban/
 ```
 
 ## Validation
 
 ```bash
-# Run the full test suite (265 tests)
+# Run the full test suite
 python -m pytest tests/ -v
 
 # Run the template validation script
 bash scripts/validate_templates.sh     # or .\scripts\validate_templates.ps1
 ```
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a history of major updates.
 
 ## License
 
