@@ -201,7 +201,7 @@ class TestGitHubAction:
 
     def test_workflow_has_issue_creation(self):
         content = (REPO_ROOT / ".github" / "workflows" / "upstream-monitor.yml").read_text()
-        assert "create-issue" in content
+        assert "gh issue create" in content
 
 
 class TestUpstreamMonitorAgent:

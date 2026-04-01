@@ -48,14 +48,14 @@ jobs:
 
       - name: Create GitHub issue
         if: steps.monitor.outputs.has_changes == 'true'
-        uses: peter-evans/create-issue-from-file@v6
-        with:
-          title: "Upstream docs changed: ${{ steps.monitor.outputs.changes_count }} update(s), ${{ steps.monitor.outputs.new_count }} new page(s)"
-          content-filepath: issue_body.md
-          labels: |
-            upstream
-            automated
-          assignees: ${{ github.repository_owner }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "Upstream docs changed: ${{ steps.monitor.outputs.changes_count }} update(s), ${{ steps.monitor.outputs.new_count }} new page(s)" \
+            --body-file issue_body.md \
+            --label "upstream,automated" \
+            --assignee "${{ github.repository_owner }}"
 
       - name: Summary (no changes)
         if: steps.monitor.outputs.has_changes != 'true'
