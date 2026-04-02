@@ -1,5 +1,43 @@
 # Changelog
 
+## [1.2.0] - 2026-04-02
+
+### Features First-Class (Issue #6)
+- Added `features/` directory to kanban structure with `FEAT-TEMPLATE.md`
+- Feature files (`FEAT-NNN.md`) support Goal, Stories, Acceptance Criteria sections
+- `kanban_webui.py` parses feature files and displays goal, story grouping, and completion progress
+- `dashboard.py` loads feature files and merges with board.md features
+- `/story-write` skill now creates feature files when a new feature is referenced
+- Kanban rules updated: every feature must have a file, every story must reference a feature
+- Bootstrap scripts (Bash + PowerShell) create `features/` directory and copy template
+- Sample project includes `FEAT-001.md` example
+
+### WebUI Robustness
+- Auto-detect and kill previous instance when launching on the same port (Windows + Unix)
+
+### Board/Stories Sync (Issue #5)
+- Added `find_missing_story_files()` and `find_missing_feature_files()` detection
+- Kanban WebUI shows a warning banner when board.md references stories or features without files
+- Warning updates in real-time via live reload polling
+
+### Upstream Docs Reviewed (Issue #4)
+- Reviewed 9 changed Anthropic documentation pages: no breaking changes, all additive
+- Updated verification dates in `doc-index.md` for 9 pages
+- Refreshed upstream baseline hashes (15 pages)
+
+### Validation Fixes
+- Fixed `validate_templates.sh` and `.ps1`: skill path checks now match v2 architecture
+  (global skills at `templates/home/`, project skills at `templates/project/`)
+- Added project-level skill frontmatter validation
+- Added feature template and directory existence checks
+- Validation now passes with 0 errors (was 6 pre-existing mismatches)
+
+### Testing
+- Added `test_kanban_webui.py` with 17 tests covering story/feature sync detection,
+  feature file parsing, and board integration
+- Added 5 template structure tests for feature support
+- Total: 289 tests (was 265)
+
 ## [1.1.0] - 2026-04-01
 
 ### Upstream Monitor Hardened

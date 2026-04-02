@@ -1,6 +1,6 @@
 # StoryForge Roadmap
 
-## v1.0.0 - Current Release ✅
+## v1.2.0 - Current Release ✅
 
 StoryForge is a structured execution framework for Claude Code.
 
@@ -28,12 +28,19 @@ StoryForge is a structured execution framework for Claude Code.
 - [x] /kanban-bootstrap, /story-write, /sprint-groom, /doc-update
 - [x] /dashboard, /security-audit, /upstream-check, /release-adapt, /gh-link
 
+**Kanban Enhancements (v1.2)**
+- [x] Feature files (`features/FEAT-NNN.md`) with template
+- [x] Board/stories sync validation (missing file detection + webui warning)
+- [x] Feature display in webui: goal, story grouping, progress bars
+- [x] Validation scripts fixed for v2 skill architecture
+
 **Tooling**
 - [x] Kanban dashboard (Python, terminal, colored output)
+- [x] Kanban web UI (live reload, dark theme, feature/story views)
 - [x] Upstream monitor (content hashing, GitHub Action cron, cloud trigger)
 - [x] Security audit scanner (static analysis, secret detection)
 - [x] Velocity tracking and dependency detection in dashboard
-- [x] 238 tests
+- [x] 289 tests
 
 **Documentation**
 - [x] Architecture, operating model, source of truth policy

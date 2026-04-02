@@ -126,7 +126,9 @@ if (-not $SkipKanban) {
     Write-Host "Setting up .kanban/ ..."
     $KanbanDir = Join-Path $ProjectDir ".kanban"
     $StoriesDir = Join-Path $KanbanDir "stories"
+    $FeaturesDir = Join-Path $KanbanDir "features"
     New-Item -ItemType Directory -Path $StoriesDir -Force | Out-Null
+    New-Item -ItemType Directory -Path $FeaturesDir -Force | Out-Null
 
     $TemplateFiles = @("board.md", "backlog.md", "sprint.md", "decisions.md", "changelog.md")
     foreach ($FileName in $TemplateFiles) {
@@ -140,6 +142,10 @@ if (-not $SkipKanban) {
     # Copy story template
     Copy-Item (Join-Path $TemplateDir ".kanban\stories\STORY-TEMPLATE.md") (Join-Path $StoriesDir "STORY-TEMPLATE.md")
     Write-Host "  CREATED: .kanban\stories\STORY-TEMPLATE.md" -ForegroundColor Green
+
+    # Copy feature template
+    Copy-Item (Join-Path $TemplateDir ".kanban\features\FEAT-TEMPLATE.md") (Join-Path $FeaturesDir "FEAT-TEMPLATE.md")
+    Write-Host "  CREATED: .kanban\features\FEAT-TEMPLATE.md" -ForegroundColor Green
 }
 
 # Update .gitignore

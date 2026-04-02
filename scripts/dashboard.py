@@ -185,6 +185,7 @@ class KanbanData:
             self.sprint_text = sprint_path.read_text(encoding="utf-8")
 
         self._load_stories()
+        self._load_feature_files()
         self._parse_velocity()
         return True
 
@@ -232,6 +233,40 @@ class KanbanData:
                 if dep and dep["status"] != "Done":
                     blocked.append((story_id, dep_id, dep["status"]))
         return blocked
+
+    def _load_feature_files(self):
+        """Load feature files from .kanban/features/ and merge with board features."""
+        features_dir = self.kanban_dir / "features"
+        if not features_dir.is_dir():
+            return
+
+        file_ids = set()
+        for feat_file in sorted(features_dir.glob("FEAT-[0-9]*.md")):
+            feat_id = feat_file.stem
+            file_ids.add(feat_id)
+            text = feat_file.read_text(encoding="utf-8")
+            title = feat_id
+            status = ""
+            initiative = ""
+
+            m = re.search(r"^#\s+(?:FEAT-\d+:\s*)?(.+)", text, re.MULTILINE)
+            if m:
+                title = m.group(1).strip()
+            for line in text.splitlines():
+                if "**Status**" in line:
+                    status = line.split(":")[-1].strip().rstrip("*").strip()
+                elif "**Initiative**" in line:
+                    initiative = line.split(":")[-1].strip().rstrip("*").strip()
+
+            # Merge: if feature already exists in board, update; otherwise add
+            existing = next((f for f in self.features if f.get("ID") == feat_id), None)
+            if not existing:
+                self.features.append({
+                    "ID": feat_id,
+                    "Title": title,
+                    "Initiative": initiative,
+                    "Status": status,
+                })
 
     def _parse_board(self):
         """Parse board.md into sections and features."""

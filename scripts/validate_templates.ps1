@@ -68,9 +68,16 @@ foreach ($Agent in $Agents) {
     Test-FileExists "templates\home\.claude\agents\$Agent.md" "$Agent agent"
 }
 
-$Skills = @("kanban-bootstrap", "story-write", "sprint-groom", "release-adapt", "doc-update")
-foreach ($Skill in $Skills) {
-    Test-FileExists "templates\home\.claude\skills\$Skill\SKILL.md" "$Skill skill"
+$GlobalSkills = @("kanban-bootstrap", "release-adapt", "security-audit", "upstream-check")
+foreach ($Skill in $GlobalSkills) {
+    Test-FileExists "templates\home\.claude\skills\$Skill\SKILL.md" "$Skill skill (global)"
+}
+
+Write-Host ""
+Write-Host "Checking project-level skills..."
+$ProjectSkills = @("story-write", "sprint-groom", "doc-update", "dashboard", "gh-link")
+foreach ($Skill in $ProjectSkills) {
+    Test-FileExists "templates\project\.claude\skills\$Skill\SKILL.md" "$Skill skill (project)"
 }
 
 # Agent frontmatter
@@ -106,6 +113,8 @@ Test-FileExists "templates\project\.kanban\sprint.md" "Sprint"
 Test-FileExists "templates\project\.kanban\decisions.md" "Decisions"
 Test-FileExists "templates\project\.kanban\changelog.md" "Changelog"
 Test-FileExists "templates\project\.kanban\stories\STORY-TEMPLATE.md" "Story template"
+Test-DirExists "templates\project\.kanban\features" "Feature files directory"
+Test-FileExists "templates\project\.kanban\features\FEAT-TEMPLATE.md" "Feature template"
 
 # JSON validation
 Write-Host ""

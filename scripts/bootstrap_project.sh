@@ -112,6 +112,7 @@ if [ "$SKIP_KANBAN" = false ]; then
     echo ""
     echo "Setting up .kanban/ ..."
     mkdir -p "$PROJECT_DIR/.kanban/stories"
+    mkdir -p "$PROJECT_DIR/.kanban/features"
 
     for template_file in board.md backlog.md sprint.md decisions.md changelog.md; do
         sed "s/{{PROJECT_NAME}}/$PROJECT_NAME_SED/g" \
@@ -124,8 +125,14 @@ if [ "$SKIP_KANBAN" = false ]; then
         "$PROJECT_DIR/.kanban/stories/STORY-TEMPLATE.md"
     echo "  CREATED: .kanban/stories/STORY-TEMPLATE.md"
 
+    # Copy feature template
+    cp "$TEMPLATE_DIR/.kanban/features/FEAT-TEMPLATE.md" \
+        "$PROJECT_DIR/.kanban/features/FEAT-TEMPLATE.md"
+    echo "  CREATED: .kanban/features/FEAT-TEMPLATE.md"
+
     # Create .gitkeep
     touch "$PROJECT_DIR/.kanban/stories/.gitkeep"
+    touch "$PROJECT_DIR/.kanban/features/.gitkeep"
 fi
 
 # Add to .gitignore if it exists
@@ -155,6 +162,7 @@ if [ "$SKIP_KANBAN" = false ]; then
     echo "  .kanban/decisions.md      - Decision records"
     echo "  .kanban/changelog.md      - Delivery changelog"
     echo "  .kanban/stories/          - Story files"
+    echo "  .kanban/features/         - Feature files"
 fi
 echo ""
 echo "Next steps:"

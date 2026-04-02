@@ -169,6 +169,18 @@ class TestProjectTemplateStructure:
     def test_story_template_exists(self):
         assert (PROJECT_TEMPLATE / ".kanban" / "stories" / "STORY-TEMPLATE.md").is_file()
 
+    def test_kanban_features_dir_exists(self):
+        assert (PROJECT_TEMPLATE / ".kanban" / "features").is_dir()
+
+    def test_feature_template_exists(self):
+        assert (PROJECT_TEMPLATE / ".kanban" / "features" / "FEAT-TEMPLATE.md").is_file()
+
+    def test_feature_template_has_required_sections(self):
+        content = (PROJECT_TEMPLATE / ".kanban" / "features" / "FEAT-TEMPLATE.md").read_text()
+        required_sections = ["Goal", "Stories", "Acceptance Criteria"]
+        for section in required_sections:
+            assert section in content, f"Feature template missing section: {section}"
+
     def test_kanban_board_has_placeholder(self):
         content = (PROJECT_TEMPLATE / ".kanban" / "board.md").read_text()
         assert "{{PROJECT_NAME}}" in content
@@ -265,6 +277,11 @@ class TestRulesFiles:
         content = (PROJECT_TEMPLATE / ".claude" / "rules" / "kanban.md").read_text()
         assert "paths:" in content
         assert ".kanban/" in content
+
+    def test_project_kanban_rule_mentions_features(self):
+        content = (PROJECT_TEMPLATE / ".claude" / "rules" / "kanban.md").read_text()
+        assert "Feature" in content
+        assert "FEAT-TEMPLATE" in content
 
 
 class TestGlobalSettingsHooks:

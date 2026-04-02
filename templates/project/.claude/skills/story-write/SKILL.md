@@ -17,7 +17,11 @@ Create a new StoryForge Story file with all required fields.
 
 2. Ask the user for:
    - Story title (or use $ARGUMENTS if provided)
-   - Which Feature this belongs to (check `.kanban/board.md` for existing features)
+   - Which Feature this belongs to (check `.kanban/features/` for existing files
+     and `.kanban/board.md` for the features table)
+   - If the Feature doesn't exist yet, create a new FEAT-NNN.md file in
+     `.kanban/features/` using FEAT-TEMPLATE.md as the base, and add it to the
+     Features table in board.md
    - Which Initiative the Feature belongs to
    - Brief context for why this work is needed
    - Acceptance criteria (specific, verifiable items)

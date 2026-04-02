@@ -15,6 +15,8 @@ import http.server
 import json
 import os
 import re
+import signal
+import socket
 import sys
 import webbrowser
 from pathlib import Path
@@ -75,14 +77,107 @@ def parse_story_file(path: Path) -> dict:
     return story
 
 
+def find_board_story_refs(kanban_dir: Path) -> set:
+    """Find all STORY-NNN references in board.md."""
+    board_file = kanban_dir / "board.md"
+    if not board_file.is_file():
+        return set()
+    content = board_file.read_text(encoding="utf-8")
+    return set(re.findall(r"STORY-\d+", content))
+
+
+def find_missing_story_files(kanban_dir: Path) -> list:
+    """Return STORY-NNN IDs referenced in board.md but missing files."""
+    refs = find_board_story_refs(kanban_dir)
+    stories_dir = kanban_dir / "stories"
+    missing = []
+    for ref in sorted(refs):
+        story_file = stories_dir / f"{ref}.md"
+        if not story_file.is_file():
+            missing.append(ref)
+    return missing
+
+
+def parse_feature_file(path: Path) -> dict:
+    """Parse a FEAT-NNN.md file into a structured dict."""
+    content = path.read_text(encoding="utf-8")
+    feature = {
+        "id": path.stem,
+        "file": path.name,
+        "title": "",
+        "initiative": "",
+        "status": "Backlog",
+        "created": "",
+        "goal": "",
+        "story_refs": [],
+    }
+
+    # Parse title from H1
+    m = re.search(r"^#\s+(?:FEAT-\d+:\s*)?(.+)", content, re.MULTILINE)
+    if m:
+        feature["title"] = m.group(1).strip()
+
+    # Parse metadata fields
+    for key, field in [
+        ("Initiative", "initiative"),
+        ("Status", "status"),
+        ("Created", "created"),
+    ]:
+        m = re.search(rf"\*\*{key}\*\*:\s*(.+)", content)
+        if m:
+            feature[field] = m.group(1).strip()
+
+    # Parse goal section
+    goal_match = re.search(
+        r"## Goal\s*\n(.*?)(?=\n## |\Z)", content, re.DOTALL
+    )
+    if goal_match:
+        feature["goal"] = goal_match.group(1).strip()
+
+    # Parse story references from Stories section
+    stories_match = re.search(
+        r"## Stories\s*\n(.*?)(?=\n## |\Z)", content, re.DOTALL
+    )
+    if stories_match:
+        feature["story_refs"] = re.findall(
+            r"(STORY-\d+)", stories_match.group(1)
+        )
+
+    return feature
+
+
+def find_board_feature_refs(kanban_dir: Path) -> set:
+    """Find all FEAT-NNN references in board.md."""
+    board_file = kanban_dir / "board.md"
+    if not board_file.is_file():
+        return set()
+    content = board_file.read_text(encoding="utf-8")
+    return set(re.findall(r"FEAT-\d+", content))
+
+
+def find_missing_feature_files(kanban_dir: Path) -> list:
+    """Return FEAT-NNN IDs referenced in board.md but missing files."""
+    refs = find_board_feature_refs(kanban_dir)
+    features_dir = kanban_dir / "features"
+    missing = []
+    for ref in sorted(refs):
+        feat_file = features_dir / f"{ref}.md"
+        if not feat_file.is_file():
+            missing.append(ref)
+    return missing
+
+
 def parse_board(kanban_dir: Path) -> dict:
     """Parse the full Kanban board from .kanban/ directory."""
     board = {
         "stories": [],
         "features": [],
+        "feature_files": [],
         "initiatives": [],
         "sprint": None,
         "backlog_items": [],
+        "missing_stories": [],
+        "missing_features": [],
     }
 
     # Parse stories
@@ -135,6 +230,28 @@ def parse_board(kanban_dir: Path) -> dict:
             m = re.search(r"### (Sprint \d+.*?)$", content, re.MULTILINE)
             if m:
                 board["sprint"] = m.group(1)
+
+    # Parse feature files
+    features_dir = kanban_dir / "features"
+    if features_dir.is_dir():
+        for f in sorted(features_dir.glob("FEAT-[0-9]*.md")):
+            board["feature_files"].append(parse_feature_file(f))
+
+    # Merge feature files with board.md features
+    file_ids = {f["id"] for f in board["feature_files"]}
+    for ff in board["feature_files"]:
+        # If feature from file not already in board features, add it
+        if not any(bf["id"] == ff["id"] for bf in board["features"]):
+            board["features"].append({
+                "id": ff["id"],
+                "title": ff["title"],
+                "initiative": ff["initiative"],
+                "status": ff["status"],
+            })
+
+    # Detect missing story and feature files
+    board["missing_stories"] = find_missing_story_files(kanban_dir)
+    board["missing_features"] = find_missing_feature_files(kanban_dir)
 
     # Parse backlog.md future items
     backlog_file = kanban_dir / "backlog.md"
@@ -559,6 +676,29 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     font-style: italic;
   }
 
+  /* Warning banner */
+  .warning-banner {
+    background: rgba(210,153,34,0.12);
+    border: 1px solid var(--yellow);
+    border-radius: 8px;
+    margin: 12px 24px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--yellow);
+    display: none;
+  }
+
+  .warning-banner.visible { display: block; }
+
+  .warning-banner strong { color: var(--text); }
+
+  .warning-banner .missing-ids {
+    margin-top: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -586,6 +726,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <div class="tab" data-view="features">Features</div>
   <div class="tab" data-view="backlog">Backlog</div>
 </div>
+
+<div class="warning-banner" id="warning-banner"></div>
 
 <div class="board active" id="board-view">
   <div class="column col-backlog">
@@ -706,23 +848,45 @@ function renderCards() {
 // --- Render Features ---
 function renderFeatures() {
   const view = document.getElementById('features-view');
+
+  // Build a lookup of feature files by ID
+  const fileById = {};
+  if (DATA.feature_files) {
+    DATA.feature_files.forEach(ff => { fileById[ff.id] = ff; });
+  }
+
+  // Group features by initiative
   const byInit = {};
   DATA.initiatives.forEach(i => { byInit[i.id] = { ...i, features: [] }; });
+  // Add an "unassigned" group for features not matching any initiative
+  const unassigned = { id: '', title: 'Unassigned', status: '', features: [] };
+
   DATA.features.forEach(f => {
     const iid = f.initiative;
-    if (byInit[iid]) byInit[iid].features.push(f);
+    if (byInit[iid]) {
+      byInit[iid].features.push(f);
+    } else {
+      unassigned.features.push(f);
+    }
   });
 
   let html = '';
-  Object.values(byInit).forEach(init => {
-    html += `<h2 style="margin-bottom:4px;font-size:15px;">${esc(init.id)}: ${esc(init.title)}
-      <span style="font-size:12px;color:var(--text-dim);font-weight:400;"> &mdash; ${esc(init.status)}</span></h2>`;
+  const groups = [...Object.values(byInit)];
+  if (unassigned.features.length > 0) groups.push(unassigned);
+
+  groups.forEach(init => {
+    if (init.features.length === 0 && init.id) return;
+    if (init.id) {
+      html += `<h2 style="margin-bottom:4px;font-size:15px;">${esc(init.id)}: ${esc(init.title)}
+        <span style="font-size:12px;color:var(--text-dim);font-weight:400;"> &mdash; ${esc(init.status)}</span></h2>`;
+    }
     html += '<div class="feature-grid">';
     init.features.forEach(f => {
       const statusCls = f.status.toLowerCase().replace(/\s+/g, '');
-      const stories = DATA.stories.filter(s =>
-        s.feature.includes(f.id)
-      );
+      const stories = DATA.stories.filter(s => s.feature.includes(f.id));
+      const doneStories = stories.filter(s => s.status.toLowerCase() === 'done').length;
+      const ff = fileById[f.id];
+      const goal = ff && ff.goal ? ff.goal : '';
       html += `
         <div class="feature-card">
           <h3>
@@ -730,11 +894,23 @@ function renderFeatures() {
             ${esc(f.title)}
             <span class="feat-status ${statusCls}">${esc(f.status)}</span>
           </h3>
+          ${goal ? `<div style="font-size:12px;color:var(--text-dim);margin:6px 0;">${esc(goal)}</div>` : ''}
           <div class="feature-stories">
+            <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">
+              Stories: ${doneStories}/${stories.length} done
+            </div>
             ${stories.length > 0
-              ? stories.map(s => `<div>${esc(s.id)}: ${esc(s.title)}</div>`).join('')
+              ? stories.map(s => {
+                  const sIcon = s.status.toLowerCase() === 'done' ? '&#10003;' : '&#9675;';
+                  const sColor = s.status.toLowerCase() === 'done' ? 'var(--green)' : 'var(--text-dim)';
+                  return `<div><span style="color:${sColor}">${sIcon}</span> ${esc(s.id)}: ${esc(s.title)}</div>`;
+                }).join('')
               : '<div style="font-style:italic">No tracked stories</div>'}
           </div>
+          ${stories.length > 0 ? `
+          <div class="progress-bar" style="margin-top:8px">
+            <div class="progress-fill" style="width:${stories.length > 0 ? Math.round((doneStories / stories.length) * 100) : 0}%"></div>
+          </div>` : ''}
         </div>`;
     });
     html += '</div>';
@@ -755,6 +931,35 @@ function renderBacklog() {
       <ul>${item.details.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
     </div>
   `).join('');
+}
+
+// --- Warning Banner ---
+function renderWarnings() {
+  const banner = document.getElementById('warning-banner');
+  const msgs = [];
+
+  if (DATA.missing_stories && DATA.missing_stories.length > 0) {
+    msgs.push(
+      '<strong>Missing story files:</strong> ' +
+      DATA.missing_stories.map(id => esc(id) + '.md').join(', ') +
+      ' referenced in board.md but no file in stories/'
+    );
+  }
+
+  if (DATA.missing_features && DATA.missing_features.length > 0) {
+    msgs.push(
+      '<strong>Missing feature files:</strong> ' +
+      DATA.missing_features.map(id => esc(id) + '.md').join(', ') +
+      ' referenced in board.md but no file in features/'
+    );
+  }
+
+  if (msgs.length > 0) {
+    banner.innerHTML = msgs.join('<br>');
+    banner.classList.add('visible');
+  } else {
+    banner.classList.remove('visible');
+  }
 }
 
 // --- Modal ---
@@ -841,6 +1046,7 @@ async function pollForUpdates() {
       renderCards();
       renderFeatures();
       renderBacklog();
+      renderWarnings();
     }
   } catch (e) { /* ignore network errors */ }
 }
@@ -851,6 +1057,7 @@ setInterval(pollForUpdates, 3000);
 renderCards();
 renderFeatures();
 renderBacklog();
+renderWarnings();
 </script>
 </body>
 </html>"""
@@ -897,6 +1104,54 @@ class KanbanHandler(http.server.BaseHTTPRequestHandler):
         pass
 
 
+def _is_port_in_use(port: int) -> bool:
+    """Check if a TCP port is already in use on localhost."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind(("127.0.0.1", port))
+            return False
+        except OSError:
+            return True
+
+
+def _kill_process_on_port(port: int) -> None:
+    """Kill the process occupying a given port. Works on Windows and Unix."""
+    import subprocess
+
+    try:
+        if sys.platform == "win32":
+            # netstat to find PID, then taskkill
+            result = subprocess.run(
+                ["netstat", "-ano"],
+                capture_output=True, text=True, timeout=5,
+            )
+            for line in result.stdout.splitlines():
+                if f"127.0.0.1:{port}" in line and "LISTENING" in line:
+                    parts = line.split()
+                    pid = parts[-1]
+                    if pid.isdigit() and int(pid) != os.getpid():
+                        subprocess.run(
+                            ["taskkill", "/F", "/PID", pid],
+                            capture_output=True, timeout=5,
+                        )
+                        print(f"  Killed previous process (PID {pid}).")
+                        return
+        else:
+            # lsof to find PID, then kill
+            result = subprocess.run(
+                ["lsof", "-ti", f"tcp:{port}", "-s", "tcp:listen"],
+                capture_output=True, text=True, timeout=5,
+            )
+            for pid_str in result.stdout.strip().splitlines():
+                pid = int(pid_str)
+                if pid != os.getpid():
+                    os.kill(pid, signal.SIGTERM)
+                    print(f"  Killed previous process (PID {pid}).")
+                    return
+    except (subprocess.SubprocessError, ValueError, OSError):
+        pass  # Fall through to the bind attempt which will give a clear error
+
+
 def main():
     if sys.platform == "win32":
         try:
@@ -940,8 +1195,20 @@ def main():
 
     KanbanHandler.kanban_dir = kanban_dir
 
-    server = http.server.HTTPServer(("127.0.0.1", port), KanbanHandler)
     url = f"http://127.0.0.1:{port}"
+
+    # Check if port is already in use and kill the previous instance
+    if _is_port_in_use(port):
+        print(f"  Port {port} is already in use. Stopping previous instance...")
+        _kill_process_on_port(port)
+
+    try:
+        server = http.server.HTTPServer(("127.0.0.1", port), KanbanHandler)
+    except OSError as e:
+        print(f"Error: Could not bind to port {port}: {e}")
+        print("Try --port <other_port> or stop the existing process manually.")
+        sys.exit(1)
+
     print(f"\nKanban board available at: {url}")
     print("Press Ctrl+C to stop.\n")
 

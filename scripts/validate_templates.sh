@@ -84,19 +84,14 @@ check_file "templates/home/.claude/agents/doc-maintainer.md" "Doc maintainer age
 check_file "templates/home/.claude/agents/upstream-watch.md" "Upstream watch agent"
 check_dir "templates/home/.claude/skills" "Skill definitions"
 check_file "templates/home/.claude/skills/kanban-bootstrap/SKILL.md" "Kanban bootstrap skill"
-check_file "templates/home/.claude/skills/story-write/SKILL.md" "Story write skill"
-check_file "templates/home/.claude/skills/sprint-groom/SKILL.md" "Sprint groom skill"
 check_file "templates/home/.claude/skills/release-adapt/SKILL.md" "Release adapt skill"
-check_file "templates/home/.claude/skills/doc-update/SKILL.md" "Doc update skill"
-check_file "templates/home/.claude/skills/dashboard/SKILL.md" "Dashboard skill"
 check_file "templates/home/.claude/skills/upstream-check/SKILL.md" "Upstream check skill"
 check_file "templates/home/.claude/skills/security-audit/SKILL.md" "Security audit skill"
-check_file "templates/home/.claude/skills/gh-link/SKILL.md" "GitHub link skill"
 
 # Validate rules
 echo ""
 echo "Checking rules files..."
-check_file "templates/home/.claude/rules/storyforge-delivery.md" "Global delivery rules"
+check_file "templates/project/.claude/rules/storyforge-delivery.md" "Project delivery rules"
 check_file "templates/project/.claude/rules/kanban.md" "Project kanban rules"
 check_file ".claude/CLAUDE.md" "StoryForge project CLAUDE.md"
 check_file ".claude/rules/templates.md" "StoryForge templates rule"
@@ -151,6 +146,36 @@ for skill_file in "$STORYFORGE_ROOT"/templates/home/.claude/skills/*/SKILL.md; d
     fi
 done
 
+# Validate project-level skills
+echo ""
+echo "Checking project-level skills..."
+check_file "templates/project/.claude/skills/story-write/SKILL.md" "Story write skill"
+check_file "templates/project/.claude/skills/sprint-groom/SKILL.md" "Sprint groom skill"
+check_file "templates/project/.claude/skills/doc-update/SKILL.md" "Doc update skill"
+check_file "templates/project/.claude/skills/dashboard/SKILL.md" "Dashboard skill"
+check_file "templates/project/.claude/skills/gh-link/SKILL.md" "GitHub link skill"
+
+# Validate project-level skill frontmatter
+echo ""
+echo "Checking project-level skill frontmatter..."
+for skill_file in "$STORYFORGE_ROOT"/templates/project/.claude/skills/*/SKILL.md; do
+    if [ -f "$skill_file" ]; then
+        skill_dir=$(basename "$(dirname "$skill_file")")
+        if head -1 "$skill_file" | grep -q "^---$"; then
+            echo "  OK: $skill_dir has frontmatter"
+        else
+            echo "  ERROR: $skill_dir missing YAML frontmatter"
+            ERRORS=$((ERRORS + 1))
+        fi
+        if grep -q "^name:" "$skill_file"; then
+            echo "  OK: $skill_dir has name field"
+        else
+            echo "  ERROR: $skill_dir missing name field"
+            ERRORS=$((ERRORS + 1))
+        fi
+    fi
+done
+
 # Validate project templates
 echo ""
 echo "Checking project-level templates..."
@@ -162,6 +187,8 @@ check_file "templates/project/.kanban/sprint.md" "Sprint template"
 check_file "templates/project/.kanban/decisions.md" "Decisions template"
 check_file "templates/project/.kanban/changelog.md" "Changelog template"
 check_file "templates/project/.kanban/stories/STORY-TEMPLATE.md" "Story template"
+check_dir "templates/project/.kanban/features" "Feature files directory"
+check_file "templates/project/.kanban/features/FEAT-TEMPLATE.md" "Feature template"
 
 # Validate JSON files
 echo ""
