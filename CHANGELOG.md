@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.1] - 2026-04-04
+
+### Upstream Adaptation (Issue #8)
+- Reviewed 15 changed Anthropic documentation pages (2 HIGH, 2 MEDIUM, 4 LOW, 6 NONE)
+- Updated `anthropic-source-map.md` with 49 new native entries:
+  - 7 subagent frontmatter fields: `memory`, `background`, `effort`, `isolation`, `color`, `initialPrompt`, `mcpServers`
+  - 20 new hook events (from 6 to 26): `InstructionsLoaded`, `PermissionRequest`, `SubagentStart/Stop`, `SessionEnd`, etc.
+  - 3 new hook handler types: `http`, `prompt`, `agent`
+  - 8 new hook handler fields: `if`, `statusMessage`, `once`, `async`, `shell`, etc.
+  - 6 new skill frontmatter fields: `model`, `effort`, `agent`, `hooks`, `paths`, `shell`
+  - 5 new settings fields: `claudeMdExcludes`, `autoMemoryEnabled`, `autoMemoryDirectory`, `disableAllHooks`, `disableSkillShellExecution`
+- Updated verification dates for all 15 pages in `doc-index.md`
+- Refreshed upstream baseline hashes
+- No breaking changes — all upstream updates are additive
+- Closed Issues #7 (superseded) and #8 (adapted)
+
 ## [1.2.0] - 2026-04-02
 
 ### Features First-Class (Issue #6)

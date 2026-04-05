@@ -3,7 +3,7 @@
 This document maps every StoryForge capability to the official Anthropic documentation
 that justifies or informs its design.
 
-Last audited: 2026-03-29
+Last audited: 2026-04-04
 
 ## Capability Classification
 
@@ -51,6 +51,11 @@ Each StoryForge capability is classified as one of:
 | `model` for default model override | Native | Settings docs: model field |
 | `hooks` configuration in settings.json | Native | Hooks docs: hook configuration format |
 | `agent` for default session agent | Native | Settings docs: agent field |
+| `claudeMdExcludes` to skip CLAUDE.md files by glob | Native | Settings docs: claudeMdExcludes field |
+| `autoMemoryEnabled` to disable auto memory per project | Native | Settings docs: autoMemoryEnabled field |
+| `autoMemoryDirectory` to customize memory location | Native | Settings docs: autoMemoryDirectory field |
+| `disableAllHooks` to disable all hooks | Native | Settings docs: disableAllHooks field |
+| `disableSkillShellExecution` to disable skill shell injection | Native | Settings docs: disableSkillShellExecution field |
 | Safe default permission mode (default/acceptEdits) | Convention | StoryForge convention: prefer safety |
 
 ## Subagents
@@ -67,6 +72,13 @@ Each StoryForge capability is classified as one of:
 | `maxTurns` for agent turn limits | Native | Subagents docs: maxTurns field |
 | `skills` for preloading skills into agent | Native | Subagents docs: skills field |
 | `hooks` scoped to agent lifecycle | Native | Subagents docs: hooks in frontmatter |
+| `memory` field (scope: user, project, local) | Native | Subagents docs: memory field |
+| `background` for background task execution | Native | Subagents docs: background field |
+| `effort` for effort level override | Native | Subagents docs: effort field |
+| `isolation` (worktree) for isolated execution | Native | Subagents docs: isolation field |
+| `color` for UI display color | Native | Subagents docs: color field |
+| `initialPrompt` for auto-submitted first turn | Native | Subagents docs: initialPrompt field |
+| `mcpServers` scoped to a subagent | Native | Subagents docs: mcpServers field |
 | Automatic delegation based on description | Native | Subagents docs: automatic delegation |
 | Subagents cannot spawn other subagents | Native | Subagents docs: no nested subagents |
 | portfolio-orchestrator as primary orchestrator | Convention | StoryForge convention |
@@ -85,6 +97,16 @@ Each StoryForge capability is classified as one of:
 | `user-invocable: false` for Claude-only skills | Native | Skills docs: invocation control |
 | `context: fork` for subagent execution | Native | Skills docs: context field |
 | `allowed-tools` for skill-scoped permissions | Native | Skills docs: allowed-tools field |
+| `model` for skill-specific model override | Native | Skills docs: model field |
+| `effort` for skill effort level | Native | Skills docs: effort field |
+| `agent` for specifying subagent type with fork | Native | Skills docs: agent field |
+| `hooks` for skill-scoped lifecycle hooks | Native | Skills docs: hooks field |
+| `paths` for glob-based auto-activation | Native | Skills docs: paths field |
+| `shell` for shell type (bash/powershell) | Native | Skills docs: shell field |
+| `$ARGUMENTS[N]` / `$N` positional arguments | Native | Skills docs: argument substitutions |
+| `${CLAUDE_SESSION_ID}` substitution variable | Native | Skills docs: session variable |
+| `${CLAUDE_SKILL_DIR}` substitution variable | Native | Skills docs: skill directory variable |
+| Inline shell injection with `` !`command` `` | Native | Skills docs: shell injection syntax |
 | Kanban bootstrap as a skill | Convention | StoryForge convention |
 | Story writing as a skill | Convention | StoryForge convention |
 | Sprint grooming as a skill | Convention | StoryForge convention |
@@ -99,6 +121,29 @@ Each StoryForge capability is classified as one of:
 | `Stop` hook for completion checks | Native | Hooks docs: Stop event |
 | `UserPromptSubmit` hook for prompt interception | Native | Hooks docs: UserPromptSubmit event |
 | `Notification` hook for desktop alerts | Native | Hooks docs: Notification event |
+| `InstructionsLoaded` hook for instruction debugging | Native | Hooks docs: InstructionsLoaded event |
+| `PermissionRequest` hook for permission interception | Native | Hooks docs: PermissionRequest event |
+| `PermissionDenied` hook for denial handling | Native | Hooks docs: PermissionDenied event |
+| `PostToolUseFailure` hook for tool failure handling | Native | Hooks docs: PostToolUseFailure event |
+| `SubagentStart` / `SubagentStop` lifecycle hooks | Native | Hooks docs: subagent lifecycle events |
+| `TaskCreated` / `TaskCompleted` for agent teams | Native | Hooks docs: task lifecycle events |
+| `TeammateIdle` for agent team coordination | Native | Hooks docs: TeammateIdle event |
+| `ConfigChange` hook for config file changes | Native | Hooks docs: ConfigChange event |
+| `CwdChanged` hook for directory changes | Native | Hooks docs: CwdChanged event |
+| `FileChanged` hook for watched file changes | Native | Hooks docs: FileChanged event |
+| `PreCompact` / `PostCompact` for context compaction | Native | Hooks docs: compaction events |
+| `WorktreeCreate` / `WorktreeRemove` lifecycle hooks | Native | Hooks docs: worktree events |
+| `Elicitation` / `ElicitationResult` for MCP input | Native | Hooks docs: elicitation events |
+| `SessionEnd` hook for session termination | Native | Hooks docs: SessionEnd event |
+| `StopFailure` hook for API error handling | Native | Hooks docs: StopFailure event |
+| `http` hook handler type (webhooks) | Native | Hooks docs: http handler type |
+| `prompt` hook handler type (LLM-evaluated) | Native | Hooks docs: prompt handler type |
+| `agent` hook handler type (agent-evaluated) | Native | Hooks docs: agent handler type |
+| `if` conditional field for permission filtering | Native | Hooks docs: if field |
+| `statusMessage` for custom spinner text | Native | Hooks docs: statusMessage field |
+| `once` flag for single execution per session | Native | Hooks docs: once field |
+| `async` flag for background execution | Native | Hooks docs: async field |
+| `shell` field for handler shell type | Native | Hooks docs: shell field |
 | Exit code 2 to block actions | Native | Hooks docs: exit code behavior |
 | JSON response format for structured control | Native | Hooks docs: structured JSON response |
 | Hook matchers with regex patterns | Native | Hooks docs: hook matchers |
