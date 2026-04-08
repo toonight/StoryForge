@@ -2,7 +2,7 @@
 
 Official documentation sources used by StoryForge, with last-verified dates.
 
-Last updated: 2026-04-04
+Last updated: 2026-04-08
 
 ## Primary Documentation
 
@@ -10,13 +10,13 @@ Last updated: 2026-04-04
 |---|---|---|---|
 | Memory & CLAUDE.md | https://code.claude.com/docs/en/memory | 2026-04-04 | Global + Project CLAUDE.md templates, auto memory |
 | Subagents | https://code.claude.com/docs/en/sub-agents | 2026-04-04 | Agent strategy, all agent definitions |
-| Hooks | https://code.claude.com/docs/en/hooks | 2026-04-04 | Hook configuration, enforcement layer |
+| Hooks | https://code.claude.com/docs/en/hooks | 2026-04-08 | Hook configuration, enforcement layer |
 | Skills | https://code.claude.com/docs/en/skills | 2026-04-04 | All skill definitions |
 | Settings | https://code.claude.com/docs/en/settings | 2026-04-04 | User + project settings templates |
 | CLI Reference | https://code.claude.com/docs/en/cli-reference | 2026-04-04 | Scripts, install, bootstrap |
 | Permission Modes | https://code.claude.com/docs/en/permission-modes | 2026-04-04 | Safety policy, default modes |
 | Permissions | https://code.claude.com/docs/en/permissions | 2026-04-04 | Permission rules in templates |
-| Common Workflows | https://code.claude.com/docs/en/common-workflows | 2026-04-04 | Workflow patterns |
+| Common Workflows | https://code.claude.com/docs/en/common-workflows | 2026-04-08 | Workflow patterns |
 | Best Practices | https://code.claude.com/docs/en/best-practices | 2026-04-04 | CLAUDE.md content guidance |
 | Headless Mode | https://code.claude.com/docs/en/headless | 2026-04-04 | Non-interactive scripts |
 | GitHub Actions | https://code.claude.com/docs/en/github-actions | 2026-04-04 | CI/CD integration |
