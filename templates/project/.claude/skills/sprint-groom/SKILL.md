@@ -2,6 +2,8 @@
 name: sprint-groom
 description: Plan or review a sprint by selecting Stories from Ready state into the sprint backlog. Use for sprint planning or mid-sprint reviews.
 disable-model-invocation: true
+paths:
+  - ".kanban/sprint.md"
 ---
 
 # Sprint Grooming

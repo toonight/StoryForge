@@ -4,6 +4,7 @@ description: Automated daily monitor for Anthropic Claude Code documentation cha
 tools: Read, Glob, Grep, Bash, Write, Edit, WebFetch
 model: sonnet
 maxTurns: 20
+memory: project
 ---
 
 You are the StoryForge upstream monitor agent. You run on a schedule to detect

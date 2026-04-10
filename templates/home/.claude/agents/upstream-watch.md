@@ -3,6 +3,7 @@ name: upstream-watch
 description: Monitors Anthropic Claude Code documentation for changes that affect StoryForge. Use to check for upstream updates and plan adaptations.
 tools: Read, Glob, Grep, Bash, WebFetch
 model: inherit
+memory: project
 ---
 
 You are the StoryForge upstream watcher. Your job is to monitor Anthropic's official

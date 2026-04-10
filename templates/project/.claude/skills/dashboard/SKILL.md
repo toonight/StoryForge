@@ -2,6 +2,8 @@
 name: dashboard
 description: Display the StoryForge Kanban dashboard showing board status, features, active stories, sprint progress, and recent activity. Use to get a quick overview of project delivery state.
 disable-model-invocation: true
+paths:
+  - ".kanban/board.md"
 ---
 
 # StoryForge Dashboard

@@ -2,6 +2,8 @@
 name: doc-update
 description: Update StoryForge delivery artifacts after work is completed. Updates story status, board, changelog, and captures follow-ups. Use after completing implementation work.
 disable-model-invocation: true
+paths:
+  - ".kanban/stories/*.md"
 ---
 
 # Documentation Update
