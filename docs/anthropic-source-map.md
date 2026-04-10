@@ -46,7 +46,8 @@ Each StoryForge capability is classified as one of:
 | `.claude/settings.json` for project-level settings | Native | Settings docs: project-level scope |
 | `.claude/settings.local.json` for local overrides | Native | Settings docs: local settings scope |
 | `permissions.allow` / `permissions.deny` rules | Native | Settings docs: permission configuration |
-| `permissions.defaultMode` for startup mode | Native | Settings docs: permission settings |
+| `permissions.ask` rules for confirmation prompts | Native | Settings docs: permission configuration |
+| `permissions.additionalDirectories` for extra working dirs | Native | Settings docs: permission configuration |
 | `env` for environment variables | Native | Settings docs: env field |
 | `model` for default model override | Native | Settings docs: model field |
 | `hooks` configuration in settings.json | Native | Hooks docs: hook configuration format |
@@ -56,6 +57,13 @@ Each StoryForge capability is classified as one of:
 | `autoMemoryDirectory` to customize memory location | Native | Settings docs: autoMemoryDirectory field |
 | `disableAllHooks` to disable all hooks | Native | Settings docs: disableAllHooks field |
 | `disableSkillShellExecution` to disable skill shell injection | Native | Settings docs: disableSkillShellExecution field |
+| `attribution` for custom git commit/PR attribution | Native | Settings docs: attribution field |
+| `language` for response language preference | Native | Settings docs: language field |
+| `outputStyle` for output style configuration | Native | Settings docs: outputStyle field |
+| `plansDirectory` for custom plan file storage | Native | Settings docs: plansDirectory field |
+| `autoMode` for auto mode classifier configuration | Native | Settings docs: autoMode field |
+| `worktree.symlinkDirectories` for worktree symlinks | Native | Settings docs: worktree settings |
+| `worktree.sparsePaths` for worktree sparse checkout | Native | Settings docs: worktree settings |
 | Safe default permission mode (default/acceptEdits) | Convention | StoryForge convention: prefer safety |
 
 ## Subagents
@@ -148,6 +156,9 @@ Each StoryForge capability is classified as one of:
 | JSON response format for structured control | Native | Hooks docs: structured JSON response |
 | Hook matchers with regex patterns | Native | Hooks docs: hook matchers |
 | `$CLAUDE_PROJECT_DIR` in hook commands | Native | Hooks docs: environment variables |
+| `$CLAUDE_ENV_FILE` for persistent env in SessionStart | Native | Hooks docs: environment variables |
+| `permissionDecision: "defer"` for Agent SDK integration | Native | Hooks docs: PreToolUse defer decision |
+| `allowedEnvVars` for HTTP hook header interpolation | Native | Hooks docs: http handler security |
 | Session-start context injection | Convention | StoryForge convention using native SessionStart |
 | Agile discipline enforcement via hooks | Convention | StoryForge convention using native hooks |
 
