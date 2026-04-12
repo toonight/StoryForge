@@ -193,6 +193,11 @@ Each StoryForge capability is classified as one of:
 | Automated upstream monitoring via content hashing | Convention | StoryForge convention |
 | GitHub Action cron for daily doc checks | Convention | StoryForge convention |
 | Claude Code scheduled trigger for daily monitoring | Native | Scheduled tasks docs: cloud remote agents |
+| `/loop` bundled skill for session-scoped polling | Native | Scheduled tasks docs: /loop skill |
+| `loop.md` for custom default loop prompt | Native | Scheduled tasks docs: loop.md customization |
+| Desktop scheduled tasks (local, persistent) | Native | Scheduled tasks docs: desktop scheduled tasks |
+| Cloud scheduled tasks (remote, durable) | Native | Scheduled tasks docs: cloud scheduled tasks |
+| `CronCreate` / `CronList` / `CronDelete` tools | Native | Scheduled tasks docs: cron tools |
 | upstream-monitor agent (sonnet, automated) | Native | Subagents docs: model, maxTurns fields |
 | /upstream-check skill for manual trigger | Native | Skills docs: user-invocable skills |
 
