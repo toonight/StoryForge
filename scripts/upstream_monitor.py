@@ -138,7 +138,8 @@ def normalize_content(html: str) -> str:
     """Normalize page content for stable hashing.
 
     Strips volatile elements (scripts, styles, Next.js build artifacts,
-    session tokens, analytics) while preserving semantic documentation content.
+    session tokens, analytics, JSON-LD, preload hints) while preserving
+    semantic documentation content.
     """
     # Normalize line endings first
     text = html.replace("\r\n", "\n").replace("\r", "\n")
@@ -155,14 +156,31 @@ def normalize_content(html: str) -> str:
     text = re.sub(r'\s+data-[a-z-]+="[^"]*"', "", text)
     # Remove nonce attributes
     text = re.sub(r'\s+nonce="[^"]*"', "", text)
+    # Remove id attributes (may contain generated IDs)
+    text = re.sub(r'\s+id="[^"]*"', "", text)
+    # Remove class attributes (may contain hashed CSS module names)
+    text = re.sub(r'\s+class="[^"]*"', "", text)
     # Remove Next.js build artifact URLs (chunk hashes change per deployment)
     text = re.sub(r"/_next/static/[^\s\"'<>]+", "", text)
+    text = re.sub(r"/_next/data/[^\s\"'<>]+", "", text)
+    # Remove cache-busting query strings (?v=xxx, ?h=xxx, ?t=xxx)
+    text = re.sub(r"\?[a-z]=[0-9a-f]+", "", text)
+    # Remove hex hashes that look like build artifacts (8+ hex chars)
+    text = re.sub(r"[0-9a-f]{16,}", "", text)
     # Remove UUID-like identifiers
     text = re.sub(
         r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", "", text
     )
+    # Remove JSON-LD blocks
+    text = re.sub(
+        r'<script\s+type="application/ld\+json"[^>]*>.*?</script>',
+        "", text, flags=re.DOTALL,
+    )
     # Strip remaining HTML tags to get text content
     text = re.sub(r"<[^>]+>", " ", text)
+    # Remove bare URLs to Next.js/Vercel assets that survived tag stripping
+    text = re.sub(r"https?://[^\s]*/_next/[^\s]*", "", text)
+    text = re.sub(r"https?://[^\s]*/_vercel/[^\s]*", "", text)
     # Collapse whitespace
     text = re.sub(r"\s+", " ", text).strip()
     return text

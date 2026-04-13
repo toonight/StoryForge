@@ -46,16 +46,37 @@ jobs:
             echo "::warning::Upstream monitor stderr output detected — check logs"
           fi
 
-      - name: Create GitHub issue
+      - name: Create or update GitHub issue
         if: steps.monitor.outputs.has_changes == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue create \
-            --title "Upstream docs changed: ${{ steps.monitor.outputs.changes_count }} update(s), ${{ steps.monitor.outputs.new_count }} new page(s)" \
-            --body-file issue_body.md \
-            --label "upstream,automated" \
-            --assignee "${{ github.repository_owner }}"
+          # Check for an existing open upstream issue
+          EXISTING=$(gh issue list --state open --label "upstream,automated" --json number --jq '.[0].number // empty')
+
+          if [ -n "$EXISTING" ]; then
+            # Comment on the existing issue instead of creating a duplicate
+            gh issue comment "$EXISTING" \
+              --body "$(cat <<COMMENT_EOF
+          ## Update — $(date -u +%Y-%m-%d)
+
+          The upstream monitor detected **${{ steps.monitor.outputs.changes_count }} update(s)** and **${{ steps.monitor.outputs.new_count }} new page(s)**.
+
+          $(cat issue_body.md | sed -n '/^### Changed Pages/,/^### Next Steps/p' | head -n -1)
+
+          ---
+          *Appended by StoryForge Upstream Monitor (issue already open)*
+          COMMENT_EOF
+          )"
+            echo "Commented on existing issue #$EXISTING"
+          else
+            # No open issue — create a new one
+            gh issue create \
+              --title "Upstream docs changed: ${{ steps.monitor.outputs.changes_count }} update(s), ${{ steps.monitor.outputs.new_count }} new page(s)" \
+              --body-file issue_body.md \
+              --label "upstream,automated" \
+              --assignee "${{ github.repository_owner }}"
+          fi
 
       - name: Summary (no changes)
         if: steps.monitor.outputs.has_changes != 'true'

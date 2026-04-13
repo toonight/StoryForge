@@ -1,90 +1,90 @@
 {
   "agent-teams": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "41601bde3b9a556fa03bb38a0f19f4a69bf6224d4ef414ec78f18ac1d26c76cd",
     "name": "Agent Teams",
     "url": "https://code.claude.com/docs/en/agent-teams"
   },
   "best-practices": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "fa7750a47888a2a1c731617dde19d35f440ce9d8c7e01bd1a00e73bdd5f417b4",
     "name": "Best Practices",
     "url": "https://code.claude.com/docs/en/best-practices"
   },
   "cli-reference": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "c2e342636e358139310326babc8477424725bbf37dc5ed0a325548a1107bb8e1",
     "name": "CLI Reference",
     "url": "https://code.claude.com/docs/en/cli-reference"
   },
   "common-workflows": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "a2cb615889496a0bb477d352614c4d17d9f06ecd493faec2d0db81912abd33e8",
     "name": "Common Workflows",
     "url": "https://code.claude.com/docs/en/common-workflows"
   },
   "github-actions": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "08e0941d6751724fb49b50cdf574180081171c677bf75eaec94a2f786d693657",
     "name": "GitHub Actions",
     "url": "https://code.claude.com/docs/en/github-actions"
   },
   "headless": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "4b9480bcc1acdf353d4940d2c57d7061e78a4cbcb829912c10497a07a2fad750",
     "name": "Headless Mode",
     "url": "https://code.claude.com/docs/en/headless"
   },
   "hooks": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "1e0466c9a931f74ecb56ec3ddd2813e46415dbace1bc55cc1960ce79e7adfc88",
     "name": "Hooks",
     "url": "https://code.claude.com/docs/en/hooks"
   },
   "mcp": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "9189a3df9b161487787c47dc4308f073e1c3790966b6421b3e1923d5965bd736",
     "name": "MCP",
     "url": "https://code.claude.com/docs/en/mcp"
   },
   "memory": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "37b57067e35033338a8bf657334299740d37804606dcc471984911cd3edda18f",
     "name": "Memory & CLAUDE.md",
     "url": "https://code.claude.com/docs/en/memory"
   },
   "permission-modes": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "fd178907c15e8764d7efcb8acd42b0a0d3031ae8492f025f3744aa00dbdb216a",
     "name": "Permission Modes",
     "url": "https://code.claude.com/docs/en/permission-modes"
   },
   "permissions": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "a094b3e357e942c9282930e6e03a9d2f748bce4579ea90ebf236da47f50e9957",
     "name": "Permissions",
     "url": "https://code.claude.com/docs/en/permissions"
   },
   "scheduled-tasks": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "e001bb605e48fd7de1ae2e48139063cf2c492756cdd13cc232744d5d19e74b95",
     "name": "Scheduled Tasks",
     "url": "https://code.claude.com/docs/en/scheduled-tasks"
   },
   "settings": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "0b98bdd1da301756c81b260b5f061d2690d1b2b28079808a0f3b258ae58e93f9",
     "name": "Settings",
     "url": "https://code.claude.com/docs/en/settings"
   },
   "skills": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "67ade9960db07ddf686d26de9afd10d8476a41f4fed5925a2121777a81d2a2c8",
     "name": "Skills",
     "url": "https://code.claude.com/docs/en/skills"
   },
   "sub-agents": {
-    "checked": "2026-04-12T19:56:05Z",
+    "checked": "2026-04-13T12:16:47Z",
     "hash": "2de72eb097d86842c84a5bb71cd27a380285a5fad8d3f0983fcb023dc0d0a1a2",
     "name": "Subagents",
     "url": "https://code.claude.com/docs/en/sub-agents"

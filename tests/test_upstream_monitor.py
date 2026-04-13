@@ -61,6 +61,48 @@ class TestNormalizeContent:
         result = normalize_content(html)
         assert "  " not in result
 
+    def test_strips_id_attributes(self):
+        html = '<h2 id="generated-abc123">Title</h2>'
+        result = normalize_content(html)
+        assert "generated-abc123" not in result
+        assert "Title" in result
+
+    def test_strips_class_attributes(self):
+        html = '<div class="css-1a2b3c hash_abc">text</div>'
+        result = normalize_content(html)
+        assert "css-1a2b3c" not in result
+        assert "text" in result
+
+    def test_strips_next_data_urls(self):
+        html = '<p>content</p> /_next/data/abc123/page.json <p>more</p>'
+        result = normalize_content(html)
+        assert "/_next/data" not in result
+        assert "content" in result
+
+    def test_strips_cache_busting_params(self):
+        html = '<p>file.js?v=abc123 other?h=def456</p>'
+        result = normalize_content(html)
+        assert "?v=" not in result
+        assert "?h=" not in result
+
+    def test_strips_long_hex_hashes(self):
+        html = '<p>chunk-abc123def456abcd.js content</p>'
+        result = normalize_content(html)
+        assert "abc123def456abcd" not in result
+        assert "content" in result
+
+    def test_strips_vercel_asset_urls(self):
+        html = 'https://example.com/_vercel/insights/script.js content'
+        result = normalize_content(html)
+        assert "_vercel" not in result
+        assert "content" in result
+
+    def test_strips_next_asset_urls_after_tag_removal(self):
+        html = 'https://cdn.example.com/_next/static/chunks/abc.js content'
+        result = normalize_content(html)
+        assert "_next" not in result
+        assert "content" in result
+
     def test_deterministic(self):
         html = '<p>same content</p>'
         assert normalize_content(html) == normalize_content(html)
@@ -202,6 +244,11 @@ class TestGitHubAction:
     def test_workflow_has_issue_creation(self):
         content = (REPO_ROOT / ".github" / "workflows" / "upstream-monitor.yml").read_text()
         assert "gh issue create" in content
+
+    def test_workflow_deduplicates_issues(self):
+        content = (REPO_ROOT / ".github" / "workflows" / "upstream-monitor.yml").read_text()
+        assert "gh issue list" in content
+        assert "gh issue comment" in content
 
 
 class TestUpstreamMonitorAgent:
