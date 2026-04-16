@@ -31,4 +31,18 @@ This document tracks Anthropic Claude Code releases and their impact on StoryFor
 
 ---
 
-(New releases will be logged below as they are triaged)
+### 2026-04-15: 7 page changes triaged (Issue #17)
+
+All 7 changes are additive — no breaking changes, no template adaptation required.
+
+| Page | Impact | Notes |
+|---|---|---|
+| Memory & CLAUDE.md | No Impact | New settings (`autoMemoryDirectory`, `claudeMdExcludes`), AGENTS.md import support |
+| Subagents | Docs Impact | New additive frontmatter fields (`effort`, `isolation`, `color`, `background`, `initialPrompt`, `disallowedTools`, `permissionMode`) |
+| Hooks | Docs Impact | New events (`PostToolUseFailure`, `SubagentStart/Stop`, `TaskCreated/Completed`, `FileChanged`, `CwdChanged`, compaction, worktree, elicitation), new handler types (`http`, `prompt`, `agent`) |
+| Skills | Docs Impact | New additive fields (`effort`, `context`, `agent`, `shell`, `when_to_use`, `user-invocable`, `allowed-tools`) |
+| Settings | No Impact | New additive settings, no removals |
+| Permissions | No Impact | Existing patterns confirmed valid (`//`, `~/` syntax) |
+| Common Workflows | No Impact | Documentation/workflow guidance only |
+
+Action: Updated verification dates. Source map already current. Baseline refresh needed.
