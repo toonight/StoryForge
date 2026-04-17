@@ -46,3 +46,31 @@ All 7 changes are additive — no breaking changes, no template adaptation requi
 | Common Workflows | No Impact | Documentation/workflow guidance only |
 
 Action: Updated verification dates. Source map already current. Baseline refresh needed.
+
+---
+
+### 2026-04-17: 13 page changes triaged (Issue #18)
+
+All 13 changes are cosmetic, additive, or already adopted — no breaking changes, no template
+adaptation required. StoryForge already tracks every relevant field and event from the prior
+#16 and #17 adaptations.
+
+| Page | Impact | Notes |
+|---|---|---|
+| Subagents | No Impact | Frontmatter fields match source map (`memory`, `paths`, `if`, `effort`, `isolation`, `color`, `background`, `initialPrompt`, `disallowedTools`, `permissionMode`) |
+| Hooks | No Impact | 28 events confirmed; handler types (`command`, `http`, `prompt`, `agent`) match source map |
+| Skills | No Impact | Frontmatter fields match source map (`effort`, `context`, `agent`, `when_to_use`, `user-invocable`, `allowed-tools`, `paths`, `hooks`, `shell`, `argument-hint`, `model`, `disable-model-invocation`) |
+| Settings | No Impact | Additive only; no removals or renames |
+| CLI Reference | No Impact | `--enable-auto-mode` removal noted (v2.1.111); StoryForge scripts don't use it. `--bare`, `--permission-mode auto` confirmed |
+| Permission Modes | No Impact | Six modes confirmed (`default`, `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`) |
+| Permissions | No Impact | Rule syntax unchanged (`//`, `~/`, `/`, relative). Current deny rules in templates remain valid |
+| Common Workflows | No Impact | Documentation/workflow guidance only |
+| Headless Mode | No Impact | `--print`/`-p`, output formats, `--bare` mode confirmed |
+| GitHub Actions | No Impact | v1 GA documented; StoryForge does not ship a `claude-code-action` workflow |
+| Agent Teams | No Impact | Experimental, gated by `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`; not adopted by StoryForge |
+| MCP | No Impact | Config schema unchanged |
+| Scheduled Tasks | No Impact | `/loop`, `loop.md`, `CronCreate/List/Delete`, 7-day expiry, 10% jitter all match prior entries added in #16 |
+
+Action: Updated verification dates to 2026-04-17. No source map changes required. Baseline
+refreshed. No adaptation Stories created — the triage confirmed all changes are either
+cosmetic or already adopted.
