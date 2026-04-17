@@ -3,7 +3,7 @@
 This document maps every StoryForge capability to the official Anthropic documentation
 that justifies or informs its design.
 
-Last audited: 2026-04-15
+Last audited: 2026-04-17
 
 ## Capability Classification
 
@@ -212,3 +212,14 @@ Each StoryForge capability is classified as one of:
 | `--bare` for minimal startup | Native | CLI docs: --bare flag |
 | `--worktree` for parallel sessions | Native | CLI docs: --worktree flag |
 | Install/bootstrap scripts using CLI | Convention | StoryForge convention using native CLI |
+
+## Models & Runtime Modes
+
+| Capability | Classification | Anthropic Source |
+|---|---|---|
+| Opus 4.7 (1M context) as session model | Native | Claude model card: Opus 4.7 release notes |
+| `model: inherit` in agent frontmatter (default) | Native | Subagents docs: model field |
+| `/fast` slash command for low-latency sessions | Native | Fast mode docs: Opus 4.6 fast variant |
+| Extended thinking budget | Native | Extended thinking docs |
+| Prompt caching (5-minute TTL) | Native | Prompt caching docs |
+| StoryForge does not pin model IDs in templates | Convention | StoryForge convention to auto-adopt new releases |

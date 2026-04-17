@@ -255,6 +255,29 @@ storyforge/
   examples/                      # Sample project
 ```
 
+## Model & Context Posture
+
+StoryForge does not pin model IDs. Agent frontmatter uses `model: inherit`
+(default) so agents follow the session model, which lets StoryForge benefit
+from new Claude releases without template edits.
+
+### Current baseline (verified 2026-04-17)
+
+| Feature | Status | StoryForge use |
+|---|---|---|
+| Opus 4.7 (1M context) | Native | Auto-adopted via `inherit`; no template changes required |
+| Fast mode (`/fast`) | Native | Opt-in per session; useful for `upstream-monitor`, `doc-maintainer`, and kanban grooming where latency matters more than depth |
+| Extended thinking | Native | Not forced by templates; agents may use it when needed |
+| Agent teams (`TaskCreated`, `TeammateIdle` hooks) | Native | Classified in `anthropic-source-map.md`; not yet wired into the orchestrator |
+| Scheduled tasks (`CronCreate`, `ScheduleWakeup`) | Native | Used by `upstream-monitor` for daily doc checks |
+| Subagent fields (`effort`, `isolation`, `background`) | Native | Documented; not set in templates — defer to session defaults |
+
+### Exception: `upstream-monitor`
+
+The only agent pinned to a specific model is `upstream-monitor` (`model: sonnet`).
+This is a cost decision: daily runs would otherwise consume Opus quota for a
+task that is primarily diff-reading and summarization.
+
 ## Technology Decisions
 
 | Decision | Choice | Rationale |
