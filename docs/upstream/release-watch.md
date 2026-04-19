@@ -74,3 +74,21 @@ adaptation required. StoryForge already tracks every relevant field and event fr
 Action: Updated verification dates to 2026-04-17. No source map changes required. Baseline
 refreshed. No adaptation Stories created — the triage confirmed all changes are either
 cosmetic or already adopted.
+
+---
+
+### 2026-04-19: 4 page changes triaged (Issue #20)
+
+All 4 changes are cosmetic or already-adopted — no breaking changes, no template adaptation
+required. The source map already covers every documented field, event, mode, and tool.
+
+| Page | Impact | Notes |
+|---|---|---|
+| Hooks | No Impact | 26 events, 4 handler types (command/http/prompt/agent), matchers, common JSON I/O schema — all present in source map (lines 126 to 163). No new events or removals. |
+| Settings | No Impact | Scopes (Managed/User/Project/Local), precedence, and fields unchanged from 2026-04-17 baseline. All documented keys (autoMode, worktree.*, claudeMdExcludes, autoMemoryDirectory, disableAllHooks, etc.) already classified Native. |
+| Permissions | No Impact | Rule syntax (//, ~/, /, relative, gitignore patterns), six modes (default/acceptEdits/plan/auto/dontAsk/bypassPermissions), precedence (deny > ask > allow), process-wrapper list (timeout/time/nice/nohup/stdbuf/xargs), compound-command handling, symlink rules, auto-mode classifier config — all baseline. Managed-only settings table is additive documentation. |
+| Scheduled Tasks | No Impact | /loop variants, loop.md, CronCreate/List/Delete, 7-day expiry, 10 percent jitter (15 min cap), 90-second one-shot jitter, CLAUDE_CODE_DISABLE_CRON, 50-task session cap, v2.1.72 minimum version — all baseline. |
+
+Action: Updated verification dates to 2026-04-19. Baseline refreshed via
+scripts/upstream_monitor.py --update-baseline (15 pages rehashed). No source map changes
+required. No adaptation Stories created.
