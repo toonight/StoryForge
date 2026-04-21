@@ -92,3 +92,22 @@ required. The source map already covers every documented field, event, mode, and
 Action: Updated verification dates to 2026-04-19. Baseline refreshed via
 scripts/upstream_monitor.py --update-baseline (15 pages rehashed). No source map changes
 required. No adaptation Stories created.
+
+---
+
+### 2026-04-21: 3 page changes triaged
+
+All 3 changes are cosmetic or already-adopted — no breaking changes, no template adaptation
+required. The source map already covers every documented event, field, handler, and workflow
+reference surfaced by these pages.
+
+| Page | Impact | Notes |
+|---|---|---|
+| Hooks | No Impact | 24 events and 4 handler types (command/http/prompt/agent) confirmed; asyncRewake, defer decision, MCP tool matchers (mcp__server__tool), skill/agent hook frontmatter, FileChanged literal matching, $CLAUDE_ENV_FILE — all already present in source map (lines 126 to 163). No new events or removals. |
+| Settings | No Impact | All keys used by StoryForge templates unchanged. Sandbox and plugin marketplace keys (sandbox.*, strictKnownMarketplaces, allowedHttpHookUrls, enabledPlugins) are additive and not adopted by StoryForge. includeCoAuthoredBy deprecation noted; templates already use attribution. |
+| Common Workflows | No Impact | Pure documentation/guidance (codebase exploration, worktrees, /loop, routines, Notification hook, --permission-mode plan, --from-pr, --resume, -n). All referenced mechanisms are native CLI features already classified in the source map. |
+
+Action: Updated verification dates to 2026-04-21. Baseline refreshed via
+scripts/upstream_monitor.py --update-baseline. No source map changes required. No adaptation
+Stories created.
+
