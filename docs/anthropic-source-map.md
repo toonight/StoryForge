@@ -3,7 +3,7 @@
 This document maps every StoryForge capability to the official Anthropic documentation
 that justifies or informs its design.
 
-Last audited: 2026-04-17
+Last audited: 2026-04-26
 
 ## Capability Classification
 
@@ -108,8 +108,11 @@ Each StoryForge capability is classified as one of:
 | `model` for skill-specific model override | Native | Skills docs: model field |
 | `effort` for skill effort level | Native | Skills docs: effort field |
 | `agent` for specifying subagent type with fork | Native | Skills docs: agent field |
+| `arguments` for named positional argument declarations | Native | Skills docs: arguments field |
 | `hooks` for skill-scoped lifecycle hooks | Native | Skills docs: hooks field |
 | `paths` for glob-based auto-activation | Native | Skills docs: paths field |
+| `Skill(name)` / `Skill(name *)` permission rule syntax | Native | Permissions docs: Skill tool rules |
+| `Agent(AgentName)` permission rule syntax for subagents | Native | Permissions docs: Agent tool rules |
 | `shell` for shell type (bash/powershell) | Native | Skills docs: shell field |
 | `$ARGUMENTS[N]` / `$N` positional arguments | Native | Skills docs: argument substitutions |
 | `${CLAUDE_SESSION_ID}` substitution variable | Native | Skills docs: session variable |
@@ -147,6 +150,11 @@ Each StoryForge capability is classified as one of:
 | `http` hook handler type (webhooks) | Native | Hooks docs: http handler type |
 | `prompt` hook handler type (LLM-evaluated) | Native | Hooks docs: prompt handler type |
 | `agent` hook handler type (agent-evaluated) | Native | Hooks docs: agent handler type |
+| `mcp_tool` hook handler type (MCP server tool call) | Native | Hooks docs: mcp_tool handler type |
+| `UserPromptExpansion` hook for slash command expansion | Native | Hooks docs: UserPromptExpansion event |
+| `PostToolBatch` hook after parallel tool batch resolves | Native | Hooks docs: PostToolBatch event |
+| `${CLAUDE_PLUGIN_ROOT}` in hook commands | Native | Hooks docs: plugin environment variables |
+| `${CLAUDE_PLUGIN_DATA}` in hook commands | Native | Hooks docs: plugin environment variables |
 | `if` conditional field for permission filtering | Native | Hooks docs: if field |
 | `statusMessage` for custom spinner text | Native | Hooks docs: statusMessage field |
 | `once` flag for single execution per session | Native | Hooks docs: once field |
