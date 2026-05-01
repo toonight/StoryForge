@@ -3,7 +3,7 @@
 This document maps every StoryForge capability to the official Anthropic documentation
 that justifies or informs its design.
 
-Last audited: 2026-04-26
+Last audited: 2026-05-01
 
 ## Capability Classification
 
@@ -89,6 +89,9 @@ Each StoryForge capability is classified as one of:
 | `mcpServers` scoped to a subagent | Native | Subagents docs: mcpServers field |
 | Automatic delegation based on description | Native | Subagents docs: automatic delegation |
 | Subagents cannot spawn other subagents | Native | Subagents docs: no nested subagents |
+| `Agent(agent1, agent2)` tool syntax to restrict spawnable agents | Native | Subagents docs: control spawnable agent types |
+| `CLAUDE_CODE_SUBAGENT_MODEL` env var to override subagent model | Native | Subagents docs: model resolution order |
+| `agent-memory/` directory for subagent persistent memory | Native | Subagents docs: memory scope field |
 | portfolio-orchestrator as primary orchestrator | Convention | StoryForge convention |
 | Specialist agents (planner, implementer, etc.) | Convention | StoryForge convention |
 | Agile enforcement in agent prompts | Convention | StoryForge convention |
@@ -113,10 +116,13 @@ Each StoryForge capability is classified as one of:
 | `paths` for glob-based auto-activation | Native | Skills docs: paths field |
 | `Skill(name)` / `Skill(name *)` permission rule syntax | Native | Permissions docs: Skill tool rules |
 | `Agent(AgentName)` permission rule syntax for subagents | Native | Permissions docs: Agent tool rules |
+| `PowerShell(cmd *)` permission rule syntax | Native | Permissions docs: PowerShell rules |
+| `bypassPermissions` now includes protected paths as of v2.1.126 | Native | Permission modes docs: bypassPermissions v2.1.126 behavior |
 | `shell` for shell type (bash/powershell) | Native | Skills docs: shell field |
 | `$ARGUMENTS[N]` / `$N` positional arguments | Native | Skills docs: argument substitutions |
 | `${CLAUDE_SESSION_ID}` substitution variable | Native | Skills docs: session variable |
 | `${CLAUDE_SKILL_DIR}` substitution variable | Native | Skills docs: skill directory variable |
+| `${CLAUDE_EFFORT}` substitution variable | Native | Skills docs: effort-level variable |
 | Inline shell injection with `` !`command` `` | Native | Skills docs: shell injection syntax |
 | Kanban bootstrap as a skill | Convention | StoryForge convention |
 | Story writing as a skill | Convention | StoryForge convention |
@@ -126,6 +132,7 @@ Each StoryForge capability is classified as one of:
 
 | Capability | Classification | Anthropic Source |
 |---|---|---|
+| `Setup` hook event for `--init` / `--init-only` / `--maintenance` | Native | Hooks docs: Setup event |
 | `SessionStart` hook for session initialization | Native | Hooks docs: SessionStart event |
 | `PreToolUse` hook for pre-execution validation | Native | Hooks docs: PreToolUse event |
 | `PostToolUse` hook for post-execution actions | Native | Hooks docs: PostToolUse event |
@@ -167,6 +174,8 @@ Each StoryForge capability is classified as one of:
 | `$CLAUDE_ENV_FILE` for persistent env in SessionStart | Native | Hooks docs: environment variables |
 | `permissionDecision: "defer"` for Agent SDK integration | Native | Hooks docs: PreToolUse defer decision |
 | `allowedEnvVars` for HTTP hook header interpolation | Native | Hooks docs: http handler security |
+| `agent_id` / `agent_type` in hook input JSON (subagent context) | Native | Hooks docs: subagent hook input fields |
+| `asyncRewake` flag for background hook with wakeup on exit code 2 | Native | Hooks docs: asyncRewake field |
 | Session-start context injection | Convention | StoryForge convention using native SessionStart |
 | Agile discipline enforcement via hooks | Convention | StoryForge convention using native hooks |
 
@@ -219,6 +228,30 @@ Each StoryForge capability is classified as one of:
 | `--append-system-prompt` for additional context | Native | CLI docs: append-system-prompt flag |
 | `--bare` for minimal startup | Native | CLI docs: --bare flag |
 | `--worktree` for parallel sessions | Native | CLI docs: --worktree flag |
+| `--agents` flag for CLI-defined subagents | Native | CLI docs: --agents flag |
+| `--allowedTools` / `--disallowedTools` flags | Native | CLI docs: tool allow/deny flags |
+| `--effort` flag for session effort level | Native | CLI docs: --effort flag |
+| `--max-turns` flag for turn limits | Native | CLI docs: --max-turns flag |
+| `--max-budget-usd` flag for budget cap | Native | CLI docs: --max-budget-usd flag |
+| `--output-format` flag (text/json/stream-json) | Native | CLI docs: --output-format flag |
+| `--json-schema` flag for structured output | Native | CLI docs: --json-schema flag |
+| `--system-prompt` / `--system-prompt-file` flags | Native | CLI docs: system prompt flags |
+| `--resume` / `--continue` session flags | Native | CLI docs: resume/continue flags |
+| `--from-pr` to resume PR-linked sessions | Native | CLI docs: --from-pr flag |
+| `--name` / `-n` flag for session naming | Native | CLI docs: --name flag |
+| `--tools` flag to restrict built-in tools | Native | CLI docs: --tools flag |
+| `--setting-sources` flag for scoped settings | Native | CLI docs: --setting-sources flag |
+| `--settings` flag for additional settings | Native | CLI docs: --settings flag |
+| `--mcp-config` / `--strict-mcp-config` flags | Native | CLI docs: MCP config flags |
+| `--plugin-dir` flag for session plugins | Native | CLI docs: --plugin-dir flag |
+| `claude install` for binary install/reinstall | Native | CLI docs: install command |
+| `claude agents` to list configured subagents | Native | CLI docs: agents command |
+| `claude project purge` to clear project state | Native | CLI docs: project purge command |
+| `claude auto-mode defaults` to inspect classifier rules | Native | CLI docs: auto-mode command |
+| `--include-hook-events` for hook event streaming | Native | CLI docs: --include-hook-events flag |
+| `--exclude-dynamic-system-prompt-sections` for cache reuse | Native | CLI docs: --exclude-dynamic-system-prompt-sections flag |
+| `--fork-session` to create new session on resume | Native | CLI docs: --fork-session flag |
+| `--fallback-model` for overload fallback | Native | CLI docs: --fallback-model flag |
 | Install/bootstrap scripts using CLI | Convention | StoryForge convention using native CLI |
 
 ## Models & Runtime Modes

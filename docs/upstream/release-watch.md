@@ -141,3 +141,38 @@ Action: Updated verification dates to 2026-04-26. Source map updated with 7 new 
 Baseline refreshed. No template/agent/hook/skill changes required. No adaptation Stories
 created.
 
+---
+
+### 2026-05-01: 15 page changes triaged (Issue #22)
+
+All 15 changes are additive or clarifications — no breaking changes to StoryForge templates,
+agents, hooks, or skills. The GitHub Actions page documents a v1.0 GA with breaking changes
+from beta; StoryForge does not ship a GitHub Actions workflow so no adaptation is needed.
+
+| Page | Impact | Notes |
+|---|---|---|
+| Memory & CLAUDE.md | No Impact | New CLAUDE.md loading detail (HTML comment stripping, sub-directory lazy load), new `/memory` command UX, `CLAUDE_CODE_NEW_INIT=1` env var for interactive `/init`. All additive; already covered in source map. |
+| Subagents | Docs Impact | New `Agent(agent1, agent2)` tool-list syntax for coordinator agents restricting which subagents can be spawned. `CLAUDE_CODE_SUBAGENT_MODEL` env var for model override precedence. Subagent `agent-memory/` directory for `memory` field. Source map updated. |
+| Hooks | Docs Impact | New `Setup` event (for `--init`, `--init-only`, `--maintenance`). `asyncRewake` field documented explicitly. `agent_id` / `agent_type` in subagent hook input. Source map updated with these 3 entries. |
+| Skills | Docs Impact | New `${CLAUDE_EFFORT}` substitution variable. `disableSkillShellExecution` policy setting documented. Live change detection (no restart needed for edits). Source map updated. |
+| Settings | No Impact | Expanded key list (sandbox, plugins, channels, voice, UX prefs). All additive; not adopted by StoryForge templates. |
+| CLI Reference | Docs Impact | Substantially expanded: new commands (`claude install`, `claude agents`, `claude project purge`, `claude auto-mode defaults`, `claude remote-control`, `claude setup-token`, `claude ultrareview`); many new flags (`--agents`, `--allowedTools`, `--effort`, `--max-turns`, `--max-budget-usd`, `--output-format`, `--json-schema`, `--system-prompt`, `--resume`, `--from-pr`, `--name`, `--tools`, `--setting-sources`, `--settings`, `--mcp-config`, `--strict-mcp-config`, `--plugin-dir`, `--include-hook-events`, `--exclude-dynamic-system-prompt-sections`, `--fork-session`, `--fallback-model`). Source map updated with all CLI additions. StoryForge scripts use only `claude -p`, `--agent`, `--permission-mode`, `--bare`, `--worktree`, `--append-system-prompt` — all still valid. |
+| Permission Modes | Docs Impact | `bypassPermissions` as of v2.1.126 now also allows writes to protected paths (`.git`, `.vscode`, `.idea`, `.husky`, `.claude`). `acceptEdits` auto-approves PowerShell commands. Explicit protected-paths and protected-files tables documented. Source map updated. StoryForge templates do not use `bypassPermissions`; no adaptation required. |
+| Permissions | Docs Impact | `PowerShell(cmd *)` permission rule syntax documented. Process-wrapper stripping list (timeout/time/nice/nohup/stdbuf, bare xargs) and exec-wrapper non-approvability (`watch`, `setsid`, `flock`) documented. Source map updated. |
+| Common Workflows | No Impact | New scheduling comparison table (Routines/Desktop/`/loop`/GitHub Actions). `Ctrl+G` for in-editor plan editing. Session picker keyboard shortcuts. Worker/Reviewer parallel pattern example. All referenced mechanisms already in source map. |
+| Best Practices | No Impact | Page substantially rewritten with richer guidance (context management, verification, Plan Mode workflow, subagent use, session management, parallel sessions). All recommendations reference native features already in source map. No new capabilities introduced. |
+| Headless Mode | No Impact | Page rebranded "Run Claude Code programmatically." `system/plugin_install` events documented alongside `system/init` and `system/api_retry`. `--bare` as future default for `-p` noted. All additive; source map already covers Agent SDK framing. |
+| GitHub Actions | No Impact | v1.0 GA breaking changes from beta documented (renamed inputs, `mode` removed, `claude_args` passthrough). StoryForge does not ship a GitHub Actions workflow; no adaptation required. |
+| Agent Teams | No Impact | `TeammateIdle` hook, `TaskCreated`/`TaskCompleted` hooks, `teammateMode` setting all already in source map. Page content unchanged from prior baseline. |
+| MCP | No Impact | Core config schema unchanged. Registry UI component is React rendering noise. `allowedMcpServers`/`deniedMcpServers` managed settings already noted under Settings. |
+| Scheduled Tasks | No Impact | Scheduling comparison table added. All mechanisms (`/loop`, `CronCreate/List/Delete`, `loop.md`, jitter, 7-day expiry) match prior source map entries. |
+
+New source map entries added: `${CLAUDE_EFFORT}` skill variable, `Setup` hook event,
+`agent_id`/`agent_type` hook input fields, `asyncRewake` hook flag, `Agent(a,b)` tools syntax,
+`CLAUDE_CODE_SUBAGENT_MODEL` env var, `agent-memory/` subagent memory directory,
+`PowerShell()` permission rule, `bypassPermissions` v2.1.126 protected-path behavior,
+25 CLI commands and flags now documented in source map.
+
+Action: Updated verification dates to 2026-05-01. Source map updated with ~30 additive entries.
+Baseline refreshed. No template/agent/hook/skill changes required. No adaptation Stories created.
+
