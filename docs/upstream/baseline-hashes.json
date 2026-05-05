@@ -1,91 +1,91 @@
 {
   "agent-teams": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "483a942bc4b876c1ddda9ca1cbdd2b688ea33af5440fbd3aa82116952842b427",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "3803fb244c7d1fdf043335e49491096594b5ab74c67791d9aa72a2108416ed6a",
     "name": "Agent Teams",
     "url": "https://code.claude.com/docs/en/agent-teams"
   },
   "best-practices": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "b1a640a0390db010f5254a289d0671c8260b13831600ad3e3c289ea1cd628980",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "bb8a160e5ac7875f24a52d7eada0b63652eb1e216b53fb941549988a8b99e92d",
     "name": "Best Practices",
     "url": "https://code.claude.com/docs/en/best-practices"
   },
   "cli-reference": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "4ccdb8ca878cf587eaaf0bace04c74b58e52e79934f9c6c70797b1ecd9f4ba0c",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "dc57a3ea2be15d9cbfed27659fe6809b5bb8a98efb01b66072fd7ff1c276dc48",
     "name": "CLI Reference",
     "url": "https://code.claude.com/docs/en/cli-reference"
   },
   "common-workflows": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "da46d515260fe14d7a364cc972a8d2e04c225e68db29ffc2e67a520be2e432d3",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "153b31bb16b6bb8f2b29f22289e401b3ce4d4d3982bac8750c36ab4311d3e05c",
     "name": "Common Workflows",
     "url": "https://code.claude.com/docs/en/common-workflows"
   },
   "github-actions": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "9d356cd840efe75c9f699fc826b836c2df12b19817ad8c5772fa6670b86b9202",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "7af6e3848391e722b3d91647f1cc1f56f22b862b40465587b35fd92294234f89",
     "name": "GitHub Actions",
     "url": "https://code.claude.com/docs/en/github-actions"
   },
   "headless": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "d2f9deae8a037a912943f825b32d12090699959bcb5ccefe89a6e77bc4763753",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "95f9973c4dcb928051aaaac6a22f9a4a28979cf41b70b49f3a773f8a5450f729",
     "name": "Headless Mode",
     "url": "https://code.claude.com/docs/en/headless"
   },
   "hooks": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "005a2a1a5dfce96b948f94ef10a66e83566358296f99c8ba3700b58c6ad9cf12",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "4bc579fee61c90dea4f767b5edd56108623bf7966a441875589890e0a478c9ef",
     "name": "Hooks",
     "url": "https://code.claude.com/docs/en/hooks"
   },
   "mcp": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "d225e4e45cc3d23bfc20c85a6a7734339ba6c23fedf7490a7cb93a3b811c29b3",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "e45509fe01409c1e3a5bb4735a439840d4b5c0c7a2a5e80721f4ab5056bdeba9",
     "name": "MCP",
     "url": "https://code.claude.com/docs/en/mcp"
   },
   "memory": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "bcd4c1ae7baa45091ab3ca87d3604eb962274634c22772e7af437afd8332a07e",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "4f7adc929d5a60f6d73e9341e09f06e12f245078e3070af9f9166ff202a0526e",
     "name": "Memory & CLAUDE.md",
     "url": "https://code.claude.com/docs/en/memory"
   },
   "permission-modes": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "cb057fb4e04f684df9b34626f493557eb4a5f5f4c7fbedcb8e6f67e49beac23b",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "50427be3f3463983a02843e49a4daecf3747161087f87b7d7ca718ff7a976fbd",
     "name": "Permission Modes",
     "url": "https://code.claude.com/docs/en/permission-modes"
   },
   "permissions": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "5f0562b7bc5d64340001a9d535924b8a7ec4e08ca70ff003010ab435ecdb6a65",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "722e1fa38ece3e316003f9fe3fe0059c3a17515b98d706c661a1e1c0cbd05283",
     "name": "Permissions",
     "url": "https://code.claude.com/docs/en/permissions"
   },
   "scheduled-tasks": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "81366622b0a9f2db4f1695d182d259253c7bdb0d34e2344ace5e70817c5a975c",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "b8466af58445588d43ca3ddc1d99bdcddf21d86f4bd849f8115b901d9d04905e",
     "name": "Scheduled Tasks",
     "url": "https://code.claude.com/docs/en/scheduled-tasks"
   },
   "settings": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "eed4a83258ade707951a0c39c324a4c4b87be66ba89b5a292a33ba0ca7efbb99",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "f1a6065df89192c2c0ea9182bea9b51b0754024d62ba2d758555512ab9b1558b",
     "name": "Settings",
     "url": "https://code.claude.com/docs/en/settings"
   },
   "skills": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "ca38d782bced825bbf657aeee6fb7537e3fe755af98a38120a319006713d20e3",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "be8b7715ac37346789565cdfc65d47153d22a75e91e8c72b3039fa8d2b5b949f",
     "name": "Skills",
     "url": "https://code.claude.com/docs/en/skills"
   },
   "sub-agents": {
-    "checked": "2026-04-27T00:46:59Z",
-    "hash": "daeba679471ef9dbff85c8212ad94caa0287c882f7df5d467eaff8353af75399",
+    "checked": "2026-05-05T00:39:29Z",
+    "hash": "fb7557aba2aaecc43ba89595fb88aa0a15cbe12aec7b105a0eb758fb9ff833be",
     "name": "Subagents",
     "url": "https://code.claude.com/docs/en/sub-agents"
   }

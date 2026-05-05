@@ -113,6 +113,29 @@ Stories created.
 
 ---
 
+### 2026-05-04: 6 page changes triaged (Issue #22)
+
+All 6 changes are additive or clarifications — no breaking changes, no template adaptation
+required. Three new entries added to the source map; the rest already match prior baseline.
+
+| Page | Impact | Notes |
+|---|---|---|
+| Subagents | No Impact | All 16 frontmatter fields match source map. Plugin restrictions confirmed (no `hooks`, `mcpServers`, `permissionMode` for plugin-loaded subagents). `CLAUDE_CODE_SUBAGENT_MODEL` env var noted; not adopted by StoryForge. `Agent(agent_type)` syntax in `tools` field already in source map. |
+| Hooks | Docs Impact | New `Setup` event (one-time init via `--init-only` / `--init` / `--maintenance`). New `asyncRewake` field (background hook wakes Claude on exit code 2). Decision values clarified (`allow`/`deny`/`ask`/`defer`/`block`/`retry`). 28 events otherwise match source map. Source map updated with 2 new entries. |
+| Skills | Docs Impact | New `${CLAUDE_EFFORT}` substitution variable. All other frontmatter fields and substitutions already in source map. Source map updated with 1 new entry. |
+| CLI Reference | No Impact | New flags documented (`--init`, `--init-only`, `--maintenance`, `--effort`, `--fork-session`, `--exclude-dynamic-system-prompt-sections`, `--include-hook-events`, `--allow-dangerously-skip-permissions`, `--remote`, `--teleport`, `--remote-control`, `--channels`, `--max-budget-usd`, `--no-session-persistence`, `--debug-file`). New commands (`claude project purge`, `claude remote-control`, `claude install`, `claude auth login/logout/status`, `claude auto-mode defaults`, `claude ultrareview`, `claude setup-token`, `claude agents`). All additive; StoryForge scripts continue to use `-p`, `--bare`, `--permission-mode`, `--agent`, `--append-system-prompt` as documented. |
+| Permission Modes | No Impact | Six modes confirmed (`default`, `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions`). Behavior change in v2.1.126: `bypassPermissions` now also skips protected-path prompts. New managed settings (`permissions.disableAutoMode`, `permissions.disableBypassPermissionsMode`) and `showClearContextOnPlanAccept` setting noted; not adopted by StoryForge. Auto mode model and plan requirements documented. Protected paths list (`.git`, `.vscode`, `.idea`, `.husky`, `.claude` minus commands/agents/skills/worktrees, plus dotfiles) consistent with prior behavior. |
+| MCP | No Impact | Core config schema unchanged. Three transports (`stdio`, `http`, `sse` — sse deprecated). `claude mcp add/list/get/remove` commands unchanged. No structural changes. |
+
+New source map entries added: `Setup` hook event, `asyncRewake` hook field,
+`${CLAUDE_EFFORT}` skill substitution variable.
+
+Action: Updated verification dates to 2026-05-04. Source map updated with 3 new entries.
+Baseline refreshed. No template/agent/hook/skill changes required. No adaptation Stories
+created.
+
+---
+
 ### 2026-04-26: 11 page changes triaged (Issue #21)
 
 All 11 changes are additive or clarifications — no breaking changes, no template adaptation

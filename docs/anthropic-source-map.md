@@ -3,7 +3,7 @@
 This document maps every StoryForge capability to the official Anthropic documentation
 that justifies or informs its design.
 
-Last audited: 2026-04-26
+Last audited: 2026-05-04
 
 ## Capability Classification
 
@@ -117,6 +117,7 @@ Each StoryForge capability is classified as one of:
 | `$ARGUMENTS[N]` / `$N` positional arguments | Native | Skills docs: argument substitutions |
 | `${CLAUDE_SESSION_ID}` substitution variable | Native | Skills docs: session variable |
 | `${CLAUDE_SKILL_DIR}` substitution variable | Native | Skills docs: skill directory variable |
+| `${CLAUDE_EFFORT}` substitution variable for active effort level | Native | Skills docs: effort variable |
 | Inline shell injection with `` !`command` `` | Native | Skills docs: shell injection syntax |
 | Kanban bootstrap as a skill | Convention | StoryForge convention |
 | Story writing as a skill | Convention | StoryForge convention |
@@ -127,6 +128,7 @@ Each StoryForge capability is classified as one of:
 | Capability | Classification | Anthropic Source |
 |---|---|---|
 | `SessionStart` hook for session initialization | Native | Hooks docs: SessionStart event |
+| `Setup` hook for one-time init (`--init-only` / `--init` / `--maintenance`) | Native | Hooks docs: Setup event |
 | `PreToolUse` hook for pre-execution validation | Native | Hooks docs: PreToolUse event |
 | `PostToolUse` hook for post-execution actions | Native | Hooks docs: PostToolUse event |
 | `Stop` hook for completion checks | Native | Hooks docs: Stop event |
@@ -159,6 +161,7 @@ Each StoryForge capability is classified as one of:
 | `statusMessage` for custom spinner text | Native | Hooks docs: statusMessage field |
 | `once` flag for single execution per session | Native | Hooks docs: once field |
 | `async` flag for background execution | Native | Hooks docs: async field |
+| `asyncRewake` flag (background hook wakes Claude on exit code 2) | Native | Hooks docs: asyncRewake field |
 | `shell` field for handler shell type | Native | Hooks docs: shell field |
 | Exit code 2 to block actions | Native | Hooks docs: exit code behavior |
 | JSON response format for structured control | Native | Hooks docs: structured JSON response |
