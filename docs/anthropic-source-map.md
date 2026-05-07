@@ -3,7 +3,7 @@
 This document maps every StoryForge capability to the official Anthropic documentation
 that justifies or informs its design.
 
-Last audited: 2026-05-01
+Last audited: 2026-05-07
 
 ## Capability Classification
 
@@ -252,6 +252,19 @@ Each StoryForge capability is classified as one of:
 | `--exclude-dynamic-system-prompt-sections` for cache reuse | Native | CLI docs: --exclude-dynamic-system-prompt-sections flag |
 | `--fork-session` to create new session on resume | Native | CLI docs: --fork-session flag |
 | `--fallback-model` for overload fallback | Native | CLI docs: --fallback-model flag |
+| `claude auth login` / `auth logout` / `auth status` | Native | CLI docs: auth subcommands |
+| `claude plugin` (alias `claude plugins`) | Native | CLI docs: plugin command |
+| `--init` / `--init-only` / `--maintenance` flags for Setup hooks | Native | CLI docs: Setup-flag triple |
+| `--add-dir` for additional working directories | Native | CLI docs: --add-dir flag |
+| `--debug` / `--debug-file` flags | Native | CLI docs: debug flags |
+| `--ide` / `--no-chrome` / `--chrome` flags | Native | CLI docs: editor and browser integration flags |
+| `--session-id` / `--no-session-persistence` / `--name` flags | Native | CLI docs: session control flags |
+| `--input-format` / `--include-partial-messages` / `--replay-user-messages` flags | Native | CLI docs: stream-json input/output flags |
+| `--permission-prompt-tool` for non-interactive permission MCP tool | Native | CLI docs: --permission-prompt-tool flag |
+| `--plugin-url` for fetching session plugins from URL | Native | CLI docs: --plugin-url flag |
+| `--remote` / `--remote-control` / `--rc` / `--teleport` flags | Native | CLI docs: remote-control and web-session flags |
+| `--tmux` for worktree tmux session | Native | CLI docs: --tmux flag |
+| `--betas` / `--channels` / `--disable-slash-commands` flags | Native | CLI docs: misc session flags |
 | Install/bootstrap scripts using CLI | Convention | StoryForge convention using native CLI |
 
 ## Models & Runtime Modes

@@ -2,7 +2,7 @@
 
 Official documentation sources used by StoryForge, with last-verified dates.
 
-Last updated: 2026-05-01
+Last updated: 2026-05-07
 
 ## Primary Documentation
 
@@ -10,19 +10,19 @@ Last updated: 2026-05-01
 |---|---|---|---|
 | Memory & CLAUDE.md | https://code.claude.com/docs/en/memory | 2026-05-01 | Global + Project CLAUDE.md templates, auto memory |
 | Subagents | https://code.claude.com/docs/en/sub-agents | 2026-05-01 | Agent strategy, all agent definitions |
-| Hooks | https://code.claude.com/docs/en/hooks | 2026-05-01 | Hook configuration, enforcement layer |
-| Skills | https://code.claude.com/docs/en/skills | 2026-05-01 | All skill definitions |
-| Settings | https://code.claude.com/docs/en/settings | 2026-05-01 | User + project settings templates |
-| CLI Reference | https://code.claude.com/docs/en/cli-reference | 2026-05-01 | Scripts, install, bootstrap |
+| Hooks | https://code.claude.com/docs/en/hooks | 2026-05-07 | Hook configuration, enforcement layer |
+| Skills | https://code.claude.com/docs/en/skills | 2026-05-07 | All skill definitions |
+| Settings | https://code.claude.com/docs/en/settings | 2026-05-07 | User + project settings templates |
+| CLI Reference | https://code.claude.com/docs/en/cli-reference | 2026-05-07 | Scripts, install, bootstrap |
 | Permission Modes | https://code.claude.com/docs/en/permission-modes | 2026-05-01 | Safety policy, default modes |
-| Permissions | https://code.claude.com/docs/en/permissions | 2026-05-01 | Permission rules in templates |
+| Permissions | https://code.claude.com/docs/en/permissions | 2026-05-07 | Permission rules in templates |
 | Common Workflows | https://code.claude.com/docs/en/common-workflows | 2026-05-01 | Workflow patterns |
 | Best Practices | https://code.claude.com/docs/en/best-practices | 2026-05-01 | CLAUDE.md content guidance |
-| Headless Mode | https://code.claude.com/docs/en/headless | 2026-05-01 | Non-interactive scripts |
+| Headless Mode | https://code.claude.com/docs/en/headless | 2026-05-07 | Non-interactive scripts |
 | GitHub Actions | https://code.claude.com/docs/en/github-actions | 2026-05-01 | CI/CD integration |
 | Agent Teams | https://code.claude.com/docs/en/agent-teams | 2026-05-01 | Multi-agent patterns |
-| MCP | https://code.claude.com/docs/en/mcp | 2026-05-01 | MCP server configuration |
-| Scheduled Tasks | https://code.claude.com/docs/en/scheduled-tasks | 2026-05-01 | Cron, scheduled agents, /loop |
+| MCP | https://code.claude.com/docs/en/mcp | 2026-05-07 | MCP server configuration |
+| Scheduled Tasks | https://code.claude.com/docs/en/scheduled-tasks | 2026-05-07 | Cron, scheduled agents, /loop |
 
 ## Verification Schedule
 
