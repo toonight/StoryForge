@@ -1,0 +1,333 @@
+name: Upstream Triage (Claude)
+
+# Runs Claude Code headless to triage an upstream-changes issue and open a PR.
+#
+# Triggers:
+#   - issues.opened with label "upstream"  -> auto-triage on first opening
+#   - issues.labeled with label "triage-now" -> manual retrigger (e.g. after the
+#     daily monitor appended new changes to an existing issue)
+#   - workflow_dispatch -> manual run from the Actions UI; pass the issue number
+#
+# We deliberately do NOT trigger on issue_comment.created. The daily upstream
+# monitor appends a comment per day to a still-open issue; auto-triggering on
+# every comment would burn API credits unnecessarily. Use the "triage-now"
+# label or workflow_dispatch to retrigger after appended updates.
+
+on:
+  issues:
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to triage'
+        required: true
+        type: number
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: upstream-triage-${{ github.event.issue.number || inputs.issue_number }}
+  cancel-in-progress: false
+
+jobs:
+  triage:
+    # Gate: opened-with-upstream-label OR labeled-with-triage-now OR manual
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && github.event.action == 'opened' && contains(github.event.issue.labels.*.name, 'upstream')) ||
+      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'triage-now')
+
+    runs-on: ubuntu-latest
+    name: Triage upstream changes with Claude
+
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+
+    steps:
+      - name: Validate API key is configured
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::ANTHROPIC_API_KEY secret is not set. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip if a triage PR is already open
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          EXISTING_PR=$(gh pr list --state open --search "upstream adaptation in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING_PR" ]; then
+            echo "::warning::Triage PR #$EXISTING_PR is already open. Skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            gh issue comment "$ISSUE_NUMBER" --body "Triage skipped: PR #$EXISTING_PR is already open. Merge or close it before triggering a new triage." || true
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Python
+        if: steps.gate.outputs.skip != 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node (for Claude Code CLI)
+        if: steps.gate.outputs.skip != 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code CLI
+        if: steps.gate.outputs.skip != 'true'
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Configure git identity
+        if: steps.gate.outputs.skip != 'true'
+        run: |
+          git config user.name  "storyforge-bot"
+          git config user.email "storyforge-bot@users.noreply.github.com"
+
+      - name: Create triage branch
+        if: steps.gate.outputs.skip != 'true'
+        id: branch
+        run: |
+          set -euo pipefail
+          DATE=$(date -u +%Y-%m-%d)
+          BRANCH="upstream-adapt-${DATE}"
+          # If the branch already exists locally or remotely, suffix with run id.
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            BRANCH="${BRANCH}-run${{ github.run_id }}"
+          fi
+          git checkout -b "$BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+
+      - name: Stage upstream-watch agent for headless run
+        if: steps.gate.outputs.skip != 'true'
+        run: |
+          # claude --bare won't auto-discover .claude/agents/, but we don't rely
+          # on subagent dispatch in headless mode — we run a single-prompt
+          # triage. The agent file is copied so its system prompt is available
+          # via --append-system-prompt-file as a behavioural baseline.
+          mkdir -p .claude/agents
+          cp templates/home/.claude/agents/upstream-watch.md .claude/agents/
+
+      - name: Fetch issue body and latest update
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh issue view "$ISSUE_NUMBER" --json title,body,comments \
+            --jq '{title, body, latest_comment: (.comments | last | .body // "")}' \
+            > issue_context.json
+
+      - name: Build triage prompt
+        if: steps.gate.outputs.skip != 'true'
+        id: prompt
+        run: |
+          set -euo pipefail
+          export DATE="${{ steps.branch.outputs.date }}"
+          # Extract the most recent change list. The bot appends comments with
+          # the format `## Update — YYYY-MM-DD` and a fresh table; if there are
+          # no comments, use the original issue body.
+          LATEST=$(jq -r '.latest_comment' issue_context.json)
+          BODY=$(jq -r '.body' issue_context.json)
+          if [ -n "$LATEST" ] && [ "$LATEST" != "null" ]; then
+            CHANGE_LIST="$LATEST"
+          else
+            CHANGE_LIST="$BODY"
+          fi
+          echo "$CHANGE_LIST" > change_list.md
+
+          cat > triage_prompt.md <<'PROMPT_EOF'
+          You are running on the StoryForge repo in a fresh branch from main.
+          A daily monitor flagged upstream documentation changes. Your job is
+          to triage them following the established pattern (see prior commits
+          tagged "docs: upstream adaptation — triage N page changes" and the
+          most recent report under docs/upstream/reports/).
+
+          ## Inputs
+          - Issue number: ${ISSUE_NUMBER}
+          - Today (UTC): ${DATE}
+          - Change list (from issue body or latest bot comment): change_list.md
+            Read it for the table of changed pages and impact areas.
+
+          ## Workflow
+          1. WebFetch each changed page listed in change_list.md.
+          2. Compare against the current state of:
+             - docs/anthropic-source-map.md
+             - docs/upstream/doc-index.md
+             - docs/upstream/baseline-hashes.json
+             - the most recent docs/upstream/reports/upstream-report-*.md
+          3. Classify each change Native/Convention/Enforcement; flag breaking
+             vs additive. Be conservative — most changes are additive.
+          4. Update artifacts:
+             - docs/anthropic-source-map.md: append new additive entries; bump
+               the "Last audited" date to ${DATE}.
+             - docs/upstream/doc-index.md: refresh verification dates to
+               ${DATE} for the listed pages; update the "Last updated" header.
+             - docs/upstream/baseline-hashes.json: refresh hashes via
+               `python scripts/upstream_monitor.py --update-baseline`.
+             - docs/upstream/release-watch.md: append a ${DATE} entry with the
+               per-page triage table (model on the most recent existing entry).
+             - docs/upstream/reports/upstream-report-${DATE}.md: new report
+               file in the same format as the most recent one in the reports
+               directory.
+          5. Do NOT touch .claude/settings.json, .github/, or any file outside
+             docs/. Do NOT create .kanban/ Stories unless you find a genuine
+             breaking change requiring template/agent/hook/skill adaptation.
+          6. Print a final summary to stdout listing: per-page verdict
+             (cosmetic / additive / breaking), files modified, and whether any
+             adaptation Stories were created.
+
+          ## Constraints
+          - Do not invoke subagents. Do all work in this single session.
+          - Use only the tools you've been allowed.
+          - Never claim a change is "breaking" unless you can point to a
+            removed/renamed/incompatible field, flag, event, or API.
+          PROMPT_EOF
+
+          # Substitute env vars
+          envsubst < triage_prompt.md > triage_prompt.expanded.md
+          mv triage_prompt.expanded.md triage_prompt.md
+          echo "Prompt prepared:"
+          wc -l triage_prompt.md
+
+      - name: Run Claude headless triage
+        if: steps.gate.outputs.skip != 'true'
+        timeout-minutes: 30
+        run: |
+          set -euo pipefail
+          claude --bare -p "$(cat triage_prompt.md)" \
+            --permission-mode acceptEdits \
+            --allowedTools "Read,Edit,Write,Glob,Grep,WebFetch,Bash(python *),Bash(git diff *),Bash(git status *),Bash(ls *),Bash(cat *)" \
+            --append-system-prompt-file .claude/agents/upstream-watch.md \
+            --output-format json \
+          | tee claude_output.json | jq -r '.result' > claude_summary.txt
+          echo "--- Claude summary ---"
+          cat claude_summary.txt
+
+      - name: Commit triage changes
+        if: steps.gate.outputs.skip != 'true'
+        id: commit
+        run: |
+          set -euo pipefail
+
+          # Capture changes count from the scratch file before we delete it.
+          # Count entries in change_list.md table rows (lines starting with "| [").
+          CHANGES=$(grep -cE '^\| \[' change_list.md || echo "?")
+
+          # Remove workflow-owned scratch files so the scope check below only
+          # sees files Claude actually touched. The staged agent file is also
+          # removed; we never want to commit it.
+          rm -f issue_context.json change_list.md triage_prompt.md \
+                claude_output.json claude_summary.txt
+          rm -rf .claude/agents
+          # If .claude/ is now empty, remove it too (it didn't exist on main).
+          rmdir .claude 2>/dev/null || true
+
+          # Stage only docs/ — guard against scope creep.
+          git add docs/
+          if git diff --cached --quiet; then
+            echo "::warning::Claude produced no docs/ changes. Aborting PR creation."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Refuse to commit if anything outside docs/ remains modified or
+          # untracked. Scratch files have been cleaned above; anything left
+          # outside docs/ is genuinely out of scope.
+          OUT_OF_SCOPE=$(git status --porcelain | awk '{print $2}' | grep -v '^docs/' || true)
+          if [ -n "$OUT_OF_SCOPE" ]; then
+            echo "::error::Claude modified files outside docs/:"
+            echo "$OUT_OF_SCOPE"
+            exit 1
+          fi
+
+          DATE="${{ steps.branch.outputs.date }}"
+          git commit -m "$(cat <<COMMIT
+          docs: upstream adaptation — triage ${CHANGES} page changes, refresh baseline
+
+          Triage of issue #${ISSUE_NUMBER} upstream changes (${DATE}).
+          Generated headlessly by the upstream-triage workflow.
+
+          Closes #${ISSUE_NUMBER}
+
+          Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+          COMMIT
+          )"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: Push and open PR
+        if: steps.gate.outputs.skip != 'true' && steps.commit.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BRANCH="${{ steps.branch.outputs.branch }}"
+          DATE="${{ steps.branch.outputs.date }}"
+          git push -u origin "$BRANCH"
+
+          # Build PR body from claude_summary.txt
+          PR_BODY=$(cat <<BODY
+          Automated triage of upstream documentation changes flagged in #${ISSUE_NUMBER}.
+
+          ## Summary from Claude
+
+          $(cat claude_summary.txt)
+
+          ## What changed
+
+          See the diff in this PR:
+          - \`docs/anthropic-source-map.md\` — additive entries
+          - \`docs/upstream/doc-index.md\` — verification dates bumped to ${DATE}
+          - \`docs/upstream/baseline-hashes.json\` — hashes refreshed
+          - \`docs/upstream/release-watch.md\` — ${DATE} triage entry
+          - \`docs/upstream/reports/upstream-report-${DATE}.md\` — new report
+
+          ## Review checklist
+
+          - [ ] Verdict per page is plausible (cosmetic / additive / breaking)
+          - [ ] No false negatives on breaking changes (check release-watch table)
+          - [ ] Baseline hashes match what \`scripts/upstream_monitor.py --update-baseline\` would produce
+          - [ ] No files modified outside \`docs/\`
+
+          Closes #${ISSUE_NUMBER}
+
+          🤖 Generated by [upstream-triage workflow](https://github.com/${{ github.repository }}/blob/main/.github/workflows/upstream-triage.yml)
+          BODY
+          )
+
+          gh pr create \
+            --title "docs: upstream adaptation — triage ${DATE} (Issue #${ISSUE_NUMBER})" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "$BRANCH" \
+            --label "upstream,automated"
+
+      - name: Comment on issue with PR link
+        if: steps.gate.outputs.skip != 'true' && steps.commit.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_URL=$(gh pr list --head "${{ steps.branch.outputs.branch }}" --json url --jq '.[0].url')
+          gh issue comment "$ISSUE_NUMBER" --body "Automated triage PR opened: $PR_URL"
+
+      - name: Comment on issue if no changes produced
+        if: steps.gate.outputs.skip != 'true' && steps.commit.outputs.has_changes == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "Automated triage produced no doc changes. Re-trigger with the \`triage-now\` label or close the issue manually if you've reviewed the upstream changes and find no action needed."
