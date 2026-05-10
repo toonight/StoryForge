@@ -225,6 +225,20 @@ jobs:
         id: commit
         run: |
           set -euo pipefail
+
+          # Capture changes count from the scratch file before we delete it.
+          # Count entries in change_list.md table rows (lines starting with "| [").
+          CHANGES=$(grep -cE '^\| \[' change_list.md || echo "?")
+
+          # Remove workflow-owned scratch files so the scope check below only
+          # sees files Claude actually touched. The staged agent file is also
+          # removed; we never want to commit it.
+          rm -f issue_context.json change_list.md triage_prompt.md \
+                claude_output.json claude_summary.txt
+          rm -rf .claude/agents
+          # If .claude/ is now empty, remove it too (it didn't exist on main).
+          rmdir .claude 2>/dev/null || true
+
           # Stage only docs/ — guard against scope creep.
           git add docs/
           if git diff --cached --quiet; then
@@ -232,8 +246,10 @@ jobs:
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          # Refuse to commit if anything outside docs/ was modified.
-          OUT_OF_SCOPE=$(git status --porcelain | awk '$2 !~ /^docs\// && $2 !~ /^\.claude\/agents\/upstream-watch\.md$/ {print $2}')
+          # Refuse to commit if anything outside docs/ remains modified or
+          # untracked. Scratch files have been cleaned above; anything left
+          # outside docs/ is genuinely out of scope.
+          OUT_OF_SCOPE=$(git status --porcelain | awk '{print $2}' | grep -v '^docs/' || true)
           if [ -n "$OUT_OF_SCOPE" ]; then
             echo "::error::Claude modified files outside docs/:"
             echo "$OUT_OF_SCOPE"
@@ -241,8 +257,6 @@ jobs:
           fi
 
           DATE="${{ steps.branch.outputs.date }}"
-          # Count entries in change_list.md table rows (lines starting with "| [").
-          CHANGES=$(grep -cE '^\| \[' change_list.md || echo "?")
           git commit -m "$(cat <<COMMIT
           docs: upstream adaptation — triage ${CHANGES} page changes, refresh baseline
 
