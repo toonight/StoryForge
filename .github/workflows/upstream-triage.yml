@@ -44,14 +44,18 @@ jobs:
     name: Triage upstream changes with Claude
 
     env:
+      # Auth: prefer CLAUDE_CODE_OAUTH_TOKEN (Claude subscription) and fall
+      # back to ANTHROPIC_API_KEY if present. Pro/Max users generate the OAuth
+      # token by running `claude setup-token` locally.
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
 
     steps:
-      - name: Validate API key is configured
+      - name: Validate Claude credentials are configured
         run: |
-          if [ -z "$ANTHROPIC_API_KEY" ]; then
-            echo "::error::ANTHROPIC_API_KEY secret is not set. Add it under Settings > Secrets and variables > Actions."
+          if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+            echo "::error::No Claude credentials found. Set either CLAUDE_CODE_OAUTH_TOKEN (run \`claude setup-token\` locally on a Pro/Max account) or ANTHROPIC_API_KEY under Settings > Secrets and variables > Actions."
             exit 1
           fi
 
@@ -211,7 +215,12 @@ jobs:
         timeout-minutes: 30
         run: |
           set -euo pipefail
-          claude --bare -p "$(cat triage_prompt.md)" \
+          # Note: we don't pass --bare. Bare mode skips OAuth/keychain reads
+          # and requires ANTHROPIC_API_KEY; we want CLAUDE_CODE_OAUTH_TOKEN to
+          # work so subscription users can run this workflow without an API
+          # key. The repo has no project-level .claude/settings.json, hooks,
+          # MCP config, or plugins, so non-bare mode loads nothing surprising.
+          claude -p "$(cat triage_prompt.md)" \
             --permission-mode acceptEdits \
             --allowedTools "Read,Edit,Write,Glob,Grep,WebFetch,Bash(python *),Bash(git diff *),Bash(git status *),Bash(ls *),Bash(cat *)" \
             --append-system-prompt-file .claude/agents/upstream-watch.md \
