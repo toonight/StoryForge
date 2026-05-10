@@ -3,7 +3,7 @@
 This document maps every StoryForge capability to the official Anthropic documentation
 that justifies or informs its design.
 
-Last audited: 2026-05-04
+Last audited: 2026-05-09
 
 ## Capability Classification
 
@@ -112,6 +112,7 @@ Each StoryForge capability is classified as one of:
 | `hooks` for skill-scoped lifecycle hooks | Native | Skills docs: hooks field |
 | `paths` for glob-based auto-activation | Native | Skills docs: paths field |
 | `Skill(name)` / `Skill(name *)` permission rule syntax | Native | Permissions docs: Skill tool rules |
+| `PowerShell(<cmd>)` permission rule syntax | Native | Permissions docs: PowerShell rules |
 | `Agent(AgentName)` permission rule syntax for subagents | Native | Permissions docs: Agent tool rules |
 | `shell` for shell type (bash/powershell) | Native | Skills docs: shell field |
 | `$ARGUMENTS[N]` / `$N` positional arguments | Native | Skills docs: argument substitutions |
