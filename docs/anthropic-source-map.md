@@ -3,7 +3,7 @@
 This document maps every StoryForge capability to the official Anthropic documentation
 that justifies or informs its design.
 
-Last audited: 2026-05-09
+Last audited: 2026-05-14
 
 ## Capability Classification
 
