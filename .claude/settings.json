@@ -1,5 +1,16 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(gh issue *)",
+      "Bash(git push:*)",
+      "Bash(gh pr *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(git -c http.sslVerify=false push origin main)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ],
     "deny": [
       "Read(//.env)",
       "Read(//.env.*)",
