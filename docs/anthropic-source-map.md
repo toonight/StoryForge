@@ -3,7 +3,7 @@
 This document maps every StoryForge capability to the official Anthropic documentation
 that justifies or informs its design.
 
-Last audited: 2026-05-14
+Last audited: 2026-05-23
 
 ## Capability Classification
 
@@ -171,6 +171,7 @@ Each StoryForge capability is classified as one of:
 | `$CLAUDE_ENV_FILE` for persistent env in SessionStart | Native | Hooks docs: environment variables |
 | `permissionDecision: "defer"` for Agent SDK integration | Native | Hooks docs: PreToolUse defer decision |
 | `allowedEnvVars` for HTTP hook header interpolation | Native | Hooks docs: http handler security |
+| `terminalSequence` JSON field for OSC notifications (v2.1.141+) | Native | Hooks docs: terminalSequence field |
 | Session-start context injection | Convention | StoryForge convention using native SessionStart |
 | Agile discipline enforcement via hooks | Convention | StoryForge convention using native hooks |
 
